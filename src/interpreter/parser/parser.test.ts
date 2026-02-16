@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { parseExpression, ParseError } from './parser';
-import { Tokenizer } from './tokenizer';
 
 describe('Parser', () => {
   describe('literals', () => {
@@ -89,7 +88,7 @@ describe('Parser', () => {
     it('parses array index selection', () => {
       const ast = parseExpression('createArray(1, 2, 3)[0]');
       expect(ast).toMatchObject({ type: 'selection', base: expect.anything(), steps: expect.any(Array) });
-      const steps = (ast as { steps: { index: { value: unknown } }[] }).steps;
+      const steps = (ast as { steps: { index: { value: unknown }; optional: boolean }[] }).steps;
       expect(steps).toHaveLength(1);
       expect(steps[0].index).toMatchObject({ type: 'literal', value: 0 });
       expect(steps[0].optional).toBe(false);
