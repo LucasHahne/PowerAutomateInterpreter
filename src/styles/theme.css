@@ -1,0 +1,74 @@
+/* Dark theme + cyan accent – refined, modern styling */
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-slate-700/40 bg-slate-900/60 backdrop-blur-md;
+    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(148, 163, 184, 0.06),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .btn-primary {
+    @apply px-5 py-2.5 rounded-xl font-medium text-slate-950
+           bg-cyan-400 border-0
+           active:scale-[0.98]
+           transition-all duration-200;
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.2);
+  }
+  .btn-primary:hover {
+    @apply bg-cyan-300;
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.25);
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 rounded-xl bg-slate-800/80 border border-slate-600/60 text-slate-200
+           hover:border-slate-500 hover:bg-slate-700/50
+           active:scale-[0.98]
+           transition-all duration-200;
+  }
+
+  .input-dark {
+    @apply w-full px-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-600/50 text-slate-100
+           placeholder-slate-500
+           focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/60
+           transition-all duration-200;
+  }
+
+  .text-error {
+    @apply text-red-400;
+  }
+
+  .text-success {
+    @apply text-emerald-400;
+  }
+
+  .section-label {
+    @apply text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2;
+  }
+
+  .section-title {
+    @apply text-slate-200 font-semibold text-lg tracking-tight;
+  }
+
+  /* Expression editor syntax highlighting */
+  .token-function {
+    @apply text-cyan-400;
+  }
+  .token-function.clickable {
+    @apply cursor-pointer underline decoration-cyan-500/50 underline-offset-1 hover:decoration-cyan-400;
+  }
+  .token-string {
+    @apply text-emerald-400;
+  }
+  .token-number {
+    @apply text-amber-400;
+  }
+  .token-identifier {
+    @apply text-purple-400;
+  }
+  .token-boolean,
+  .token-null {
+    @apply text-orange-400;
+  }
+  .token-punctuation {
+    @apply text-slate-500;
+  }
+}
