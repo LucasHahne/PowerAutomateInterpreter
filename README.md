@@ -7,7 +7,7 @@ A web-based interpreter for **Power Automate** (and Azure Logic Apps) expression
 ## Features
 
 - **Expression editor** – Write Power Automate expressions with syntax highlighting and **intellisense** (function/variable suggestions).
-- **Variables & parameters** – Define inputs with types: string, integer, float, boolean, object, and array. Use them in expressions as `variables('name')` or `parameters('name')`.
+- **Variables & parameters** – Define inputs with types: string, integer, float, boolean, object, and array. Use them in expressions as `variables('name')`.
 - **Function reference** – Click any function in the expression to see its signature, parameters, return type, examples, and a link to Microsoft docs.
 - **Rich result view** – Formatted output with expandable JSON for objects and arrays.
 - **Clear errors** – Parse, type, and runtime errors with helpful messages.
