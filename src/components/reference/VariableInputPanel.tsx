@@ -1,10 +1,21 @@
-import { useState, useEffect } from 'react';
-import type { EvaluationContext, InputType } from '../../interpreter/context';
-import { parseValue, valueToString, validateValue } from '../inputs/variableFormUtils';
+import { useState, useEffect } from "react";
+import type { EvaluationContext, InputType } from "../../interpreter/context";
+import {
+  parseValue,
+  valueToString,
+  validateValue,
+} from "../inputs/variableFormUtils";
 
-const INPUT_TYPES: InputType[] = ['string', 'integer', 'float', 'boolean', 'object', 'array'];
+const INPUT_TYPES: InputType[] = [
+  "string",
+  "integer",
+  "float",
+  "boolean",
+  "object",
+  "array",
+];
 
-const NEW_VARIABLE_SENTINEL = '';
+const NEW_VARIABLE_SENTINEL = "";
 
 interface VariableInputPanelProps {
   /** Empty string = add new variable; otherwise the variable name to edit */
@@ -19,13 +30,13 @@ interface VariableInputPanelProps {
 
 function getInitialState(
   selectedVariable: string,
-  context: EvaluationContext
+  context: EvaluationContext,
 ): { name: string; type: InputType; valueStr: string } {
   if (selectedVariable === NEW_VARIABLE_SENTINEL) {
-    return { name: '', type: 'string', valueStr: '' };
+    return { name: "", type: "string", valueStr: "" };
   }
   const entry = context.variables[selectedVariable];
-  if (!entry) return { name: '', type: 'string', valueStr: '' };
+  if (!entry) return { name: "", type: "string", valueStr: "" };
   return {
     name: selectedVariable,
     type: entry.type,
@@ -42,9 +53,9 @@ export function VariableInputPanel({
   onParsedValueChange,
 }: VariableInputPanelProps) {
   const isNew = selectedVariable === NEW_VARIABLE_SENTINEL;
-  const [name, setName] = useState('');
-  const [type, setType] = useState<InputType>('string');
-  const [valueStr, setValueStr] = useState('');
+  const [name, setName] = useState("");
+  const [type, setType] = useState<InputType>("string");
+  const [valueStr, setValueStr] = useState("");
 
   useEffect(() => {
     const initial = getInitialState(selectedVariable, context);
@@ -55,7 +66,9 @@ export function VariableInputPanel({
 
   const nameTrimmed = name.trim();
   const nameValid = nameTrimmed.length > 0;
-  const existingNames = Object.keys(context.variables).filter((k) => k !== selectedVariable);
+  const existingNames = Object.keys(context.variables).filter(
+    (k) => k !== selectedVariable,
+  );
   const nameConflict = nameValid && existingNames.includes(nameTrimmed);
   const nameOk = nameValid && !nameConflict;
 
@@ -63,8 +76,8 @@ export function VariableInputPanel({
   const canSave = nameOk && valueValid;
 
   const parsedValue = (() => {
-    if (!valueStr.trim() && (type === 'object' || type === 'array'))
-      return type === 'object' ? {} : [];
+    if (!valueStr.trim() && (type === "object" || type === "array"))
+      return type === "object" ? {} : [];
     try {
       return parseValue(valueStr, type);
     } catch {
@@ -87,18 +100,19 @@ export function VariableInputPanel({
     onCancel();
   };
 
-  const isJson = type === 'object' || type === 'array';
+  const isJson = type === "object" || type === "array";
 
   return (
     <div className="panel p-5 flex flex-col h-full min-h-0 overflow-hidden">
-      <p className="section-label shrink-0">Input</p>
       <h3 className="section-title mb-4 shrink-0">
-        {isNew ? 'Add variable' : 'Edit variable'}
+        {isNew ? "Add variable" : "Edit variable"}
       </h3>
 
       <div className="flex flex-col gap-4 flex-1 min-h-0 overflow-y-auto overflow-x-hidden min-w-0 px-1">
         <div className="shrink-0">
-          <label className="block text-slate-600 dark:text-slate-400 text-sm font-medium mb-1.5">Name</label>
+          <label className="block text-slate-600 dark:text-slate-400 text-sm font-medium mb-1.5">
+            Name
+          </label>
           <input
             type="text"
             value={name}
@@ -112,12 +126,16 @@ export function VariableInputPanel({
             <p className="text-red-400 text-xs mt-1">Name is required</p>
           )}
           {nameConflict && (
-            <p className="text-red-400 text-xs mt-1">A variable with this name already exists</p>
+            <p className="text-red-400 text-xs mt-1">
+              A variable with this name already exists
+            </p>
           )}
         </div>
 
         <div className="shrink-0">
-          <label className="block text-slate-600 dark:text-slate-400 text-sm font-medium mb-1.5">Type</label>
+          <label className="block text-slate-600 dark:text-slate-400 text-sm font-medium mb-1.5">
+            Type
+          </label>
           <select
             value={type}
             onChange={(e) => setType(e.target.value as InputType)}
@@ -132,23 +150,29 @@ export function VariableInputPanel({
         </div>
 
         <div className="flex flex-col min-h-0 flex-1">
-          <label className="block text-slate-600 dark:text-slate-400 text-sm font-medium mb-1.5 shrink-0">Value</label>
+          <label className="block text-slate-600 dark:text-slate-400 text-sm font-medium mb-1.5 shrink-0">
+            Value
+          </label>
           {isJson ? (
             <div className="flex flex-col min-h-0 flex-1">
               <textarea
                 value={valueStr}
                 onChange={(e) => setValueStr(e.target.value)}
-                placeholder={type === 'object' ? '{"key": "value"}' : '[1, 2, 3]'}
+                placeholder={
+                  type === "object" ? '{"key": "value"}' : "[1, 2, 3]"
+                }
                 className="input-dark w-full flex-1 min-h-[80px] font-mono text-sm resize-none"
                 spellCheck={false}
               />
               {valueStr.trim() && parsedValue === undefined && (
                 <p className="text-red-400 text-xs mt-1 shrink-0">
-                  {type === 'object' ? 'Enter valid JSON object' : 'Enter valid JSON array'}
+                  {type === "object"
+                    ? "Enter valid JSON object"
+                    : "Enter valid JSON array"}
                 </p>
               )}
             </div>
-          ) : type === 'boolean' ? (
+          ) : type === "boolean" ? (
             <select
               value={valueStr}
               onChange={(e) => setValueStr(e.target.value)}
@@ -162,25 +186,27 @@ export function VariableInputPanel({
             <>
               <input
                 type="text"
-                inputMode={type === 'integer' || type === 'float' ? 'decimal' : 'text'}
+                inputMode={
+                  type === "integer" || type === "float" ? "decimal" : "text"
+                }
                 value={valueStr}
                 onChange={(e) => setValueStr(e.target.value)}
                 placeholder={
-                  type === 'integer'
-                    ? 'e.g. 42'
-                    : type === 'float'
-                      ? 'e.g. 3.14'
-                      : 'Value'
+                  type === "integer"
+                    ? "e.g. 42"
+                    : type === "float"
+                      ? "e.g. 3.14"
+                      : "Value"
                 }
                 className="input-dark w-full"
               />
             </>
           )}
-          {!valueValid && valueStr !== '' && type !== 'string' && (
+          {!valueValid && valueStr !== "" && type !== "string" && (
             <p className="text-red-400 text-xs mt-1">
-              {type === 'integer' && 'Enter a valid integer'}
-              {type === 'float' && 'Enter a valid number'}
-              {type === 'boolean' && 'Select true or false'}
+              {type === "integer" && "Enter a valid integer"}
+              {type === "float" && "Enter a valid number"}
+              {type === "boolean" && "Select true or false"}
             </p>
           )}
         </div>
@@ -193,7 +219,7 @@ export function VariableInputPanel({
           disabled={!canSave}
           className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isNew ? 'Add' : 'Save'}
+          {isNew ? "Add" : "Save"}
         </button>
         <button type="button" onClick={onCancel} className="btn-secondary">
           Cancel
