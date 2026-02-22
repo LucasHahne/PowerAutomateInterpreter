@@ -6,6 +6,7 @@ import { conversionFunctions } from './conversion';
 import { collectionFunctions } from './collection';
 import { dateTimeFunctions } from './dateTime';
 import { workflowFunctions } from './workflow';
+import { manipulationFunctions } from './manipulation';
 
 export type FunctionHandler = (args: unknown[], context: EvaluationContext) => unknown;
 
@@ -24,6 +25,7 @@ registerAll(conversionFunctions);
 registerAll(collectionFunctions);
 registerAll(dateTimeFunctions);
 registerAll(workflowFunctions);
+registerAll(manipulationFunctions);
 
 export function getFunction(name: string): FunctionHandler | undefined {
   return functionRegistry.get(name);

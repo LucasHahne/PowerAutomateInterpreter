@@ -20,7 +20,11 @@ export interface IntellisenseDropdownProps {
   selectedIndex?: number;
   /** For function list: called when user hovers an item */
   onHighlightIndex?: (index: number) => void;
-  onSelectFunction: (name: string, replaceStart: number, replaceEnd: number) => void;
+  onSelectFunction: (
+    name: string,
+    replaceStart: number,
+    replaceEnd: number,
+  ) => void;
   onClose: () => void;
 }
 
@@ -70,9 +74,7 @@ export function IntellisenseDropdown({
   }, [context, intellisensePortalRef]);
 
   const functionNames =
-    context?.kind === "function-list"
-      ? filterFunctions(context.prefix)
-      : [];
+    context?.kind === "function-list" ? filterFunctions(context.prefix) : [];
   const metadata: FunctionMetadata | undefined =
     context?.kind === "parameter-hint"
       ? getFunctionMetadata(context.functionName)
@@ -93,7 +95,8 @@ export function IntellisenseDropdown({
   if (!context) return null;
 
   // Wait for portal target to be mounted so we don't flash in wrong place
-  if (intellisensePortalRef && !intellisensePortalRef.current && !portalReady) return null;
+  if (intellisensePortalRef && !intellisensePortalRef.current && !portalReady)
+    return null;
 
   const popoverContent =
     context.kind === "parameter-hint" ? (
@@ -150,10 +153,12 @@ function ParameterHintPopover({
     >
       <div className="flex items-start gap-2 flex-wrap justify-between">
         <div className="flex items-baseline gap-2 flex-wrap min-w-0">
-        <span className="text-cyan-400 font-mono font-semibold">
-          {metadata.name}
-        </span>
-        <span className="text-slate-600 dark:text-slate-500 text-xs">{metadata.returns}</span>
+          <span className="text-cyan-400 font-mono font-semibold">
+            {metadata.name}
+          </span>
+          <span className="text-slate-600 dark:text-slate-500 text-xs">
+            {metadata.returns}
+          </span>
         </div>
         <button
           type="button"
@@ -161,12 +166,25 @@ function ParameterHintPopover({
           aria-label="Close"
           className="shrink-0 p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
-      <p className="text-slate-600 dark:text-slate-400 text-xs mt-1">{metadata.description}</p>
+      <p className="text-slate-600 dark:text-slate-400 text-xs mt-1">
+        {metadata.description}
+      </p>
       <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
         <p className="text-slate-600 dark:text-slate-500 text-xs font-medium uppercase tracking-wider mb-1">
           Parameters
@@ -223,7 +241,11 @@ function FunctionListPopover({
   onHighlightIndex?: (index: number) => void;
   listRef: React.RefObject<HTMLDivElement | null>;
   popoverStyle: React.CSSProperties;
-  onSelectFunction: (name: string, replaceStart: number, replaceEnd: number) => void;
+  onSelectFunction: (
+    name: string,
+    replaceStart: number,
+    replaceEnd: number,
+  ) => void;
   onClose: () => void;
 }) {
   return (
@@ -240,8 +262,19 @@ function FunctionListPopover({
           aria-label="Close"
           className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors shrink-0"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -262,7 +295,9 @@ function FunctionListPopover({
               onClick={() => onSelectFunction(name, replaceStart, replaceEnd)}
               onMouseEnter={() => onHighlightIndex?.(i)}
             >
-              <span className="font-mono text-cyan-400 font-medium">{name}</span>
+              <span className="font-mono text-cyan-400 font-medium">
+                {name}
+              </span>
               {meta && (
                 <span className="text-slate-600 dark:text-slate-500 text-xs truncate flex-1">
                   {meta.signature}
@@ -275,4 +310,3 @@ function FunctionListPopover({
     </div>
   );
 }
-

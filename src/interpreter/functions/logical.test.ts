@@ -58,4 +58,10 @@ describe('Logical functions', () => {
     expect(interpret('lessOrEquals(5, 5)', ctx)).toMatchObject({ success: true, value: true });
     expect(interpret('lessOrEquals(6, 5)', ctx)).toMatchObject({ success: true, value: false });
   });
+
+  it('coalesce', () => {
+    expect(interpret('coalesce(null, true, false)', ctx)).toMatchObject({ success: true, value: true });
+    expect(interpret('coalesce(null, null, null)', ctx)).toMatchObject({ success: true, value: null });
+    expect(interpret("coalesce(null, null, 'fallback')", ctx)).toMatchObject({ success: true, value: 'fallback' });
+  });
 });

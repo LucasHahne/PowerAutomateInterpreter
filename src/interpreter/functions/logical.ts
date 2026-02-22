@@ -61,4 +61,12 @@ export const logicalFunctions: Record<string, (args: unknown[], ctx: EvaluationC
     if (typeof a === 'number' && typeof b === 'number') return a <= b;
     return String(a) <= String(b);
   },
+  coalesce: (args) => {
+    /* c8 ignore next */
+    if (args.length < 1) throw new TypeError('coalesce expects at least 1 argument');
+    for (const v of args) {
+      if (v !== null && v !== undefined) return v;
+    }
+    return null;
+  },
 };

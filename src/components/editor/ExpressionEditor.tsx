@@ -2,7 +2,10 @@ import { useRef, useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { Tokenizer } from "../../interpreter/parser/tokenizer";
 import type { Token } from "../../interpreter/parser/tokenizer";
-import { getAllFunctionNames } from "../../interpreter/functions/metadata";
+import {
+  getAllFunctionNames,
+  getFunctionMetadata,
+} from "../../interpreter/functions/metadata";
 import { getIntellisenseContext } from "../../editor/intellisenseContext";
 import type { IntellisenseContext } from "../../editor/intellisenseContext";
 import { IntellisenseDropdown, filterFunctions } from "./IntellisenseDropdown";
@@ -273,8 +276,14 @@ export function ExpressionEditor({
     return () => document.removeEventListener("mousedown", handleMouseDown);
   }, [intellisenseContext, intellisensePortalRef, handleCloseIntellisense]);
 
+  const isUnknownFunction =
+    intellisenseContext?.kind === "parameter-hint" &&
+    !getFunctionMetadata(intellisenseContext.functionName);
+  const isFunctionListWithNoMatches =
+    intellisenseContext?.kind === "function-list" && filteredNames.length === 0;
   const showExpandButton =
-    !intellisenseContext && intellisensePortalRef?.current;
+    intellisensePortalRef?.current &&
+    (!intellisenseContext || isUnknownFunction || isFunctionListWithNoMatches);
 
   return (
     <div className="relative">
