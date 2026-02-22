@@ -64,6 +64,19 @@ export function ExpressionEditor({
   const [intellisenseSelectedIndex, setIntellisenseSelectedIndex] = useState(0);
   const [intellisenseDismissed, setIntellisenseDismissed] = useState(false);
   const [forceShowFunctionList, setForceShowFunctionList] = useState(false);
+  const [, setPortalMounted] = useState(false);
+
+  useEffect(() => {
+    if (!intellisensePortalRef) return;
+    if (intellisensePortalRef.current) {
+      setPortalMounted(true);
+      return;
+    }
+    const id = requestAnimationFrame(() => {
+      if (intellisensePortalRef.current) setPortalMounted(true);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [intellisensePortalRef]);
 
   const rawContext = getIntellisenseContext(value, cursor.start);
   const effectiveContext: IntellisenseContext | null = forceShowFunctionList
@@ -282,8 +295,8 @@ export function ExpressionEditor({
   const isFunctionListWithNoMatches =
     intellisenseContext?.kind === "function-list" && filteredNames.length === 0;
   const showExpandButton =
-    intellisensePortalRef?.current &&
-    (!intellisenseContext || isUnknownFunction || isFunctionListWithNoMatches);
+    (!intellisenseContext || isUnknownFunction || isFunctionListWithNoMatches) &&
+    intellisensePortalRef?.current;
 
   return (
     <div className="relative">
