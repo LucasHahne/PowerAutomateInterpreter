@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import type { EvaluationContext, InputType } from '../../interpreter/context';
-import { HighlightedResult } from '../output/HighlightedResult';
 import { parseValue, valueToString, validateValue } from '../inputs/variableFormUtils';
 
 const INPUT_TYPES: InputType[] = ['string', 'integer', 'float', 'boolean', 'object', 'array'];
@@ -14,6 +13,8 @@ interface VariableInputPanelProps {
   onSave: (name: string, type: InputType, valueStr: string) => void;
   onRemove: (name: string) => void;
   onCancel: () => void;
+  /** Called when the parsed value changes (for live preview in the fourth panel) */
+  onParsedValueChange?: (value: unknown) => void;
 }
 
 function getInitialState(
@@ -38,6 +39,7 @@ export function VariableInputPanel({
   onSave,
   onRemove,
   onCancel,
+  onParsedValueChange,
 }: VariableInputPanelProps) {
   const isNew = selectedVariable === NEW_VARIABLE_SENTINEL;
   const [name, setName] = useState('');
@@ -70,6 +72,10 @@ export function VariableInputPanel({
     }
   })();
 
+  useEffect(() => {
+    onParsedValueChange?.(parsedValue);
+  }, [parsedValue, onParsedValueChange]);
+
   const handleSave = () => {
     if (!canSave) return;
     onSave(nameTrimmed, type, valueStr);
@@ -90,9 +96,9 @@ export function VariableInputPanel({
         {isNew ? 'Add variable' : 'Edit variable'}
       </h3>
 
-      <div className="flex flex-col gap-4 flex-1 min-h-0 overflow-auto">
+      <div className="flex flex-col gap-4 flex-1 min-h-0 overflow-y-auto overflow-x-hidden min-w-0 px-1">
         <div className="shrink-0">
-          <label className="block text-slate-400 text-sm font-medium mb-1.5">Name</label>
+          <label className="block text-slate-600 dark:text-slate-400 text-sm font-medium mb-1.5">Name</label>
           <input
             type="text"
             value={name}
@@ -111,7 +117,7 @@ export function VariableInputPanel({
         </div>
 
         <div className="shrink-0">
-          <label className="block text-slate-400 text-sm font-medium mb-1.5">Type</label>
+          <label className="block text-slate-600 dark:text-slate-400 text-sm font-medium mb-1.5">Type</label>
           <select
             value={type}
             onChange={(e) => setType(e.target.value as InputType)}
@@ -126,7 +132,7 @@ export function VariableInputPanel({
         </div>
 
         <div className="flex flex-col min-h-0 flex-1">
-          <label className="block text-slate-400 text-sm font-medium mb-1.5 shrink-0">Value</label>
+          <label className="block text-slate-600 dark:text-slate-400 text-sm font-medium mb-1.5 shrink-0">Value</label>
           {isJson ? (
             <div className="flex flex-col min-h-0 flex-1">
               <textarea
@@ -136,13 +142,6 @@ export function VariableInputPanel({
                 className="input-dark w-full flex-1 min-h-[80px] font-mono text-sm resize-none"
                 spellCheck={false}
               />
-              {parsedValue !== undefined && (
-                <div className="rounded-xl p-4 bg-slate-800/50 border border-slate-700/40 overflow-auto max-h-32 shrink-0 mt-2">
-                  <pre className="font-mono text-sm whitespace-pre-wrap break-words m-0">
-                    <HighlightedResult value={parsedValue} />
-                  </pre>
-                </div>
-              )}
               {valueStr.trim() && parsedValue === undefined && (
                 <p className="text-red-400 text-xs mt-1 shrink-0">
                   {type === 'object' ? 'Enter valid JSON object' : 'Enter valid JSON array'}
@@ -175,13 +174,6 @@ export function VariableInputPanel({
                 }
                 className="input-dark w-full"
               />
-              {valueStr !== '' && valueValid && (
-                <div className="mt-2 rounded-lg px-3 py-2 bg-slate-800/50 border border-slate-700/40">
-                  <pre className="font-mono text-sm m-0">
-                    <HighlightedResult value={parseValue(valueStr, type)} />
-                  </pre>
-                </div>
-              )}
             </>
           )}
           {!valueValid && valueStr !== '' && type !== 'string' && (

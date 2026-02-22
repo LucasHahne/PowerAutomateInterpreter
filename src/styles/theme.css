@@ -1,16 +1,19 @@
-/* Dark theme + cyan accent – refined, modern styling */
+/* Light theme (default) + dark theme variants; cyan accent */
 @layer components {
   .panel {
-    @apply rounded-2xl border border-slate-700/40 bg-slate-900/60 backdrop-blur-md;
+    @apply rounded-2xl backdrop-blur-md;
+    @apply border border-slate-200 bg-white/90 shadow-sm;
+    @apply dark:border-slate-700/40 dark:bg-slate-900/60;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+  .dark .panel {
     box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(148, 163, 184, 0.06),
       inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
   }
 
   .btn-primary {
-    @apply px-5 py-2.5 rounded-xl font-medium text-slate-950
-           bg-cyan-400 border-0
-           active:scale-[0.98]
-           transition-all duration-200;
+    @apply px-5 py-2.5 rounded-xl font-medium text-slate-950 bg-cyan-400 border-0
+           active:scale-[0.98] transition-all duration-200;
     box-shadow: 0 0 12px rgba(34, 211, 238, 0.2);
   }
   .btn-primary:hover {
@@ -19,54 +22,58 @@
   }
 
   .btn-secondary {
-    @apply px-4 py-2 rounded-xl bg-slate-800/80 border border-slate-600/60 text-slate-200
-           hover:border-slate-500 hover:bg-slate-700/50
-           active:scale-[0.98]
-           transition-all duration-200;
+    @apply px-4 py-2 rounded-xl border active:scale-[0.98] transition-all duration-200;
+    @apply bg-slate-100 border-slate-300 text-slate-700
+           hover:border-slate-400 hover:bg-slate-200;
+    @apply dark:bg-slate-800/80 dark:border-slate-600/60 dark:text-slate-200
+           dark:hover:border-slate-500 dark:hover:bg-slate-700/50;
   }
 
   .input-dark {
-    @apply w-full px-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-600/50 text-slate-100
-           placeholder-slate-500
-           focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/60
-           transition-all duration-200;
+    @apply w-full px-3.5 py-2.5 rounded-xl transition-all duration-200;
+    @apply bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-500
+           focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/60;
+    @apply dark:bg-slate-800/80 dark:border-slate-600/50 dark:text-slate-100 dark:placeholder-slate-500;
   }
 
   .text-error {
-    @apply text-red-400;
+    @apply text-red-500 dark:text-red-400;
   }
 
   .text-success {
-    @apply text-emerald-400;
+    @apply text-emerald-600 dark:text-emerald-400;
   }
 
   .section-label {
-    @apply text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2;
+    @apply text-xs font-semibold uppercase tracking-wider mb-2
+           text-slate-500 dark:text-slate-500;
   }
 
   .section-title {
-    @apply text-slate-200 font-semibold text-lg tracking-tight;
+    @apply font-semibold text-lg tracking-tight
+           text-slate-800 dark:text-slate-200;
   }
 
   /* Expression editor syntax highlighting */
   .token-function {
-    @apply text-cyan-400;
+    @apply text-cyan-600 dark:text-cyan-400;
   }
   .token-function.clickable {
-    @apply cursor-pointer underline decoration-cyan-500/50 underline-offset-1 hover:decoration-cyan-400;
+    @apply cursor-pointer underline decoration-cyan-500/50 underline-offset-1
+           hover:decoration-cyan-400;
   }
   .token-string {
-    @apply text-emerald-400;
+    @apply text-emerald-600 dark:text-emerald-400;
   }
   .token-number {
-    @apply text-amber-400;
+    @apply text-amber-600 dark:text-amber-400;
   }
   .token-identifier {
-    @apply text-purple-400;
+    @apply text-purple-600 dark:text-purple-400;
   }
   .token-boolean,
   .token-null {
-    @apply text-orange-400;
+    @apply text-orange-600 dark:text-orange-400;
   }
   .token-punctuation {
     @apply text-slate-500;

@@ -102,5 +102,5 @@ export function HighlightedResult({ value, depth = 0, indent = 0 }: HighlightedR
       </>
     );
   }
-  return <span className="text-slate-400">{String(value)}</span>;
+  return <span className="text-slate-600 dark:text-slate-400">{String(value)}</span>;
 }

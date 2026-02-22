@@ -144,7 +144,7 @@ function ParameterHintPopover({
 
   return (
     <div
-      className="intellisense-popover parameter-hint rounded-lg border border-slate-600 bg-slate-800/95 shadow-xl backdrop-blur px-3 py-2.5 max-w-[320px]"
+      className="intellisense-popover parameter-hint rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800/95 shadow-xl backdrop-blur px-3 py-2.5 max-w-[320px]"
       style={popoverStyle}
       role="tooltip"
     >
@@ -153,22 +153,22 @@ function ParameterHintPopover({
         <span className="text-cyan-400 font-mono font-semibold">
           {metadata.name}
         </span>
-        <span className="text-slate-500 text-xs">{metadata.returns}</span>
+        <span className="text-slate-600 dark:text-slate-500 text-xs">{metadata.returns}</span>
         </div>
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="shrink-0 p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 transition-colors"
+          className="shrink-0 p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
-      <p className="text-slate-400 text-xs mt-1">{metadata.description}</p>
-      <div className="mt-2 pt-2 border-t border-slate-700">
-        <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-1">
+      <p className="text-slate-600 dark:text-slate-400 text-xs mt-1">{metadata.description}</p>
+      <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+        <p className="text-slate-600 dark:text-slate-500 text-xs font-medium uppercase tracking-wider mb-1">
           Parameters
         </p>
         <ul className="text-sm space-y-0.5">
@@ -178,7 +178,7 @@ function ParameterHintPopover({
               className={
                 i === paramIndex
                   ? "text-cyan-300 font-medium"
-                  : "text-slate-500"
+                  : "text-slate-600 dark:text-slate-500"
               }
             >
               {i + 1}. {p.name}{" "}
@@ -194,7 +194,7 @@ function ParameterHintPopover({
         </ul>
       </div>
       {param && (
-        <p className="text-slate-400 text-xs mt-2">
+        <p className="text-slate-600 dark:text-slate-400 text-xs mt-2">
           <span className="text-cyan-300">{param.name}</span>: {param.type}
           {isOptional && " (optional)"}
         </p>
@@ -228,17 +228,17 @@ function FunctionListPopover({
 }) {
   return (
     <div
-      className="intellisense-popover function-list rounded-lg border border-slate-600 bg-slate-800/95 shadow-xl backdrop-blur overflow-hidden min-w-[200px] max-h-[280px] flex flex-col"
+      className="intellisense-popover function-list rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800/95 shadow-xl backdrop-blur overflow-hidden min-w-[200px] max-h-[280px] flex flex-col"
       style={popoverStyle}
       role="listbox"
     >
-      <div className="flex items-center justify-between gap-2 text-slate-500 text-xs font-medium uppercase tracking-wider px-3 py-2 border-b border-slate-700">
+      <div className="flex items-center justify-between gap-2 text-slate-600 dark:text-slate-500 text-xs font-medium uppercase tracking-wider px-3 py-2 border-b border-slate-200 dark:border-slate-700">
         <span>Functions</span>
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 transition-colors shrink-0"
+          className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors shrink-0"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -256,15 +256,15 @@ function FunctionListPopover({
               data-selected={isSelected ? true : undefined}
               className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${
                 isSelected
-                  ? "bg-cyan-500/20 text-cyan-200"
-                  : "text-slate-300 hover:bg-slate-700/50"
+                  ? "bg-cyan-500/20 text-cyan-700 dark:text-cyan-200"
+                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50"
               }`}
               onClick={() => onSelectFunction(name, replaceStart, replaceEnd)}
               onMouseEnter={() => onHighlightIndex?.(i)}
             >
               <span className="font-mono text-cyan-400 font-medium">{name}</span>
               {meta && (
-                <span className="text-slate-500 text-xs truncate flex-1">
+                <span className="text-slate-600 dark:text-slate-500 text-xs truncate flex-1">
                   {meta.signature}
                 </span>
               )}

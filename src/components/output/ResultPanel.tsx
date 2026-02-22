@@ -9,7 +9,7 @@ export function ResultPanel({ result }: ResultPanelProps) {
     <div className="flex flex-col h-full">
       <h3 className="section-title mb-3">Result</h3>
       {result === null ? (
-        <p className="text-slate-500 text-sm py-2">
+        <p className="text-slate-600 dark:text-slate-500 text-sm py-2">
           Run an expression to see the result.
         </p>
       ) : (

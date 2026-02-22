@@ -8,6 +8,7 @@ import { ResultPanel } from "./components/output/ResultPanel";
 import { ErrorDisplay } from "./components/output/ErrorDisplay";
 import { FunctionReferencePanel } from "./components/reference/FunctionReferencePanel";
 import { VariableInputPanel } from "./components/reference/VariableInputPanel";
+import { VariableValuePanel } from "./components/reference/VariableValuePanel";
 import { parseValue } from "./components/inputs/variableFormUtils";
 import { useInterpreter } from "./hooks/useInterpreter";
 
@@ -18,16 +19,19 @@ function App() {
     useInterpreter();
   const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
   const [selectedVariable, setSelectedVariable] = useState<string | null>(null);
+  const [variablePreviewValue, setVariablePreviewValue] = useState<unknown>(undefined);
   const intellisensePortalRef = useRef<HTMLDivElement>(null);
 
   const handleVariableClick = useCallback((name: string) => {
     setSelectedVariable(name);
     setSelectedFunction(null);
+    setVariablePreviewValue(undefined);
   }, []);
 
   const handleAddVariable = useCallback(() => {
     setSelectedVariable(NEW_VARIABLE_SENTINEL);
     setSelectedFunction(null);
+    setVariablePreviewValue(undefined);
   }, []);
 
   const handleFunctionClick = useCallback((name: string | null) => {
@@ -69,9 +73,10 @@ function App() {
 
   const handleCancelVariable = useCallback(() => {
     setSelectedVariable(null);
+    setVariablePreviewValue(undefined);
   }, []);
 
-  const rightPanelContent =
+  const referencePanelContent =
     selectedVariable !== null ? (
       <VariableInputPanel
         selectedVariable={selectedVariable}
@@ -79,22 +84,31 @@ function App() {
         onSave={handleSaveVariable}
         onRemove={handleRemoveVariable}
         onCancel={handleCancelVariable}
+        onParsedValueChange={setVariablePreviewValue}
       />
     ) : selectedFunction ? (
       <FunctionReferencePanel selectedFunction={selectedFunction} />
     ) : (
       <div className="panel p-4 flex flex-col h-full">
-        <h3 className="text-slate-300 font-medium mb-3">Reference</h3>
-        <p className="text-slate-500 text-sm">
+        <h3 className="text-slate-700 dark:text-slate-300 font-medium mb-3">Reference</h3>
+        <p className="text-slate-600 dark:text-slate-500 text-sm">
           Click a variable or a function in the expression to see its details.
         </p>
       </div>
     );
 
+  const showVariableValuePanel = selectedVariable !== null;
+
   return (
     <AppShell>
-      {/* Desktop: left = 3 stacked sections, right = function reference full height. Mobile: single column. */}
-      <div className="h-full min-h-0 grid grid-cols-1 lg:grid-cols-[1fr_minmax(300px,400px)] gap-4 lg:gap-6 grid-rows-1">
+      {/* Desktop: left = 3 stacked sections, middle = reference/variable form, right = variable value (when variable selected). Mobile: single column. */}
+      <div
+        className={`h-full min-h-0 grid gap-4 lg:gap-6 grid-rows-1 ${
+          showVariableValuePanel
+            ? 'grid-cols-1 lg:grid-cols-[1fr_minmax(300px,400px)_minmax(280px,360px)]'
+            : 'grid-cols-1 lg:grid-cols-[1fr_minmax(300px,400px)]'
+        }`}
+      >
         {/* Left column: Variables (fixed height), Expression (grows with textarea), Result (fills rest). Column scrolls when needed. */}
         <div className="flex flex-col gap-4 min-h-0 lg:min-h-full overflow-auto order-1">
           <div className="panel flex-none flex flex-col min-h-[220px] max-h-[40vh] overflow-hidden p-0">
@@ -131,7 +145,7 @@ function App() {
             <ResultPanel result={output?.success ? output.value : null} />
           </div>
         </div>
-        {/* Right column: Function reference or variable input. Subtle cyan border + shadow when add variable is selected. */}
+        {/* Middle column: Function reference or variable input. Subtle cyan border + shadow when add variable is selected. */}
         <div
           className={`min-h-[320px] lg:min-h-full lg:h-full flex flex-col order-2 rounded-2xl transition-all duration-200 ${
             selectedVariable === NEW_VARIABLE_SENTINEL
@@ -140,9 +154,15 @@ function App() {
           }`}
         >
           <div className="h-full min-h-0 flex flex-col overflow-hidden rounded-2xl">
-            {rightPanelContent}
+            {referencePanelContent}
           </div>
         </div>
+        {/* Fourth column: Variable value preview (only when adding/editing a variable) */}
+        {showVariableValuePanel && (
+          <div className="min-h-[320px] lg:min-h-full lg:h-full flex flex-col order-3">
+            <VariableValuePanel value={variablePreviewValue} />
+          </div>
+        )}
       </div>
     </AppShell>
   );

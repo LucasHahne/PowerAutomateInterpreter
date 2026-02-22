@@ -95,6 +95,9 @@ export function getIntellisenseContext(value: string, cursorOffset: number): Int
   }
 
   // --- 2) Function list: after start, after '(', or after ',' (with optional whitespace), or in the middle of an identifier ---
+  // Don't auto-show when expression is empty (user must click Functions or start typing)
+  if (value.trim().length === 0) return null;
+
   const trimmed = before.replace(/\s+$/, '');
   const lastChar = trimmed[trimmed.length - 1];
 

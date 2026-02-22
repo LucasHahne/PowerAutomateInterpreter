@@ -6,45 +6,65 @@
 
 @layer base {
   html {
-    @apply text-slate-100 antialiased;
+    @apply antialiased;
+    @apply text-slate-900 dark:text-slate-100;
   }
   body {
-    @apply min-h-screen bg-slate-950;
+    @apply min-h-screen;
+    @apply bg-slate-50 dark:bg-slate-950;
+    background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34, 211, 238, 0.06), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(34, 211, 238, 0.04), transparent);
+  }
+  .dark body {
     background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34, 211, 238, 0.08), transparent),
       radial-gradient(ellipse 60% 40% at 80% 100%, rgba(34, 211, 238, 0.04), transparent);
   }
 
   /*
-   * Scrollbar styling – matches dark theme (slate track, slate/cyan thumb).
-   * Fallback: browsers that don't support these (e.g. older Safari/Firefox)
-   * will show the default system scrollbar.
+   * Scrollbar styling – light and dark variants
    */
   /* Firefox */
   * {
     scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+  }
+  .dark * {
     scrollbar-color: #475569 #1e293b;
   }
-  /* WebKit (Chrome, Safari, Edge, Opera) */
+  /* WebKit */
   *::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
   *::-webkit-scrollbar-track {
-    background: #1e293b;
+    background: #f1f5f9;
     border-radius: 4px;
   }
+  .dark *::-webkit-scrollbar-track {
+    background: #1e293b;
+  }
   *::-webkit-scrollbar-thumb {
-    background: #475569;
+    background: #cbd5e1;
     border-radius: 5px;
-    border: 2px solid #1e293b;
+    border: 2px solid #f1f5f9;
+  }
+  .dark *::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-color: #1e293b;
   }
   *::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+  .dark *::-webkit-scrollbar-thumb:hover {
     background: #64748b;
   }
   *::-webkit-scrollbar-thumb:active {
     background: rgba(34, 211, 238, 0.4);
   }
   *::-webkit-scrollbar-corner {
+    background: #f1f5f9;
+  }
+  .dark *::-webkit-scrollbar-corner {
     background: #1e293b;
   }
 }

@@ -23,7 +23,7 @@ export function VariableEditor({
 }: VariableEditorProps) {
   const isJson = type === 'object' || type === 'array';
   return (
-    <div className="flex flex-col gap-2.5 p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/40 hover:border-slate-600/60 transition-colors">
+    <div className="flex flex-col gap-2.5 p-3.5 rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 hover:border-slate-300 dark:hover:border-slate-600/60 transition-colors">
       <div className="flex gap-2 items-center">
         <input
           type="text"
