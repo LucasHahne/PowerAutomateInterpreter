@@ -257,7 +257,7 @@ export const dateTimeFunctions: Record<string, (args: unknown[], ctx: Evaluation
         second: '2-digit',
       });
       const parts = formatter.formatToParts(new Date(2000, 0, 1));
-      const order = parts.map((p) => p.type).filter((t) => ['day', 'month', 'year'].includes(t));
+      const order = parts.map((p) => String(p.type)).filter((t) => ['day', 'month', 'year'].includes(t));
       const sep = /[\/\-\.\s]+/;
       const tokens = s.split(sep);
       if (tokens.length >= 3) {
@@ -355,12 +355,12 @@ export const dateTimeFunctions: Record<string, (args: unknown[], ctx: Evaluation
     const parts = s.match(/(\d+)/g) || [];
     if (parts.length >= 6) {
       const utc = new Date(Date.UTC(
-        parseInt(parts[0], 10),
-        parseInt(parts[1], 10) - 1,
-        parseInt(parts[2], 10),
-        parseInt(parts[3], 10),
-        parseInt(parts[4], 10),
-        parseInt(parts[5], 10),
+        parseInt(parts[0] ?? '0', 10),
+        parseInt(parts[1] ?? '1', 10) - 1,
+        parseInt(parts[2] ?? '1', 10),
+        parseInt(parts[3] ?? '0', 10),
+        parseInt(parts[4] ?? '0', 10),
+        parseInt(parts[5] ?? '0', 10),
       ));
       return formatDate(utc, args[2] ? String(args[2]) : 'o');
     }
