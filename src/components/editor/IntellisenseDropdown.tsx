@@ -7,7 +7,8 @@ import {
 } from "../../interpreter/functions/metadata";
 import type { FunctionMetadata } from "../../interpreter/functions/metadata";
 
-const MAX_FUNCTION_ITEMS = 12;
+/** Max items when filtering by prefix (keeps list scannable). No limit when showing full list. */
+const MAX_FILTERED_ITEMS = 50;
 
 const INTELLISENSE_Z_INDEX = 9999;
 
@@ -30,11 +31,14 @@ export interface IntellisenseDropdownProps {
 
 export function filterFunctions(prefix: string): string[] {
   const all = getAllFunctionNames();
+  const sorted = [...all].sort((a, b) =>
+    a.toLowerCase().localeCompare(b.toLowerCase()),
+  );
   const lower = prefix.toLowerCase();
   const filtered = lower
-    ? all.filter((name) => name.toLowerCase().startsWith(lower))
-    : all;
-  return filtered.slice(0, MAX_FUNCTION_ITEMS);
+    ? sorted.filter((name) => name.toLowerCase().startsWith(lower))
+    : sorted;
+  return lower ? filtered.slice(0, MAX_FILTERED_ITEMS) : filtered;
 }
 
 const POPOVER_STYLE: React.CSSProperties = {
@@ -156,7 +160,7 @@ function ParameterHintPopover({
           <span className="text-cyan-400 font-mono font-semibold">
             {metadata.name}
           </span>
-          <span className="text-slate-600 dark:text-slate-500 text-xs">
+          <span className="text-slate-600 dark:text-slate-400 text-xs">
             {metadata.returns}
           </span>
         </div>
@@ -186,7 +190,7 @@ function ParameterHintPopover({
         {metadata.description}
       </p>
       <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-        <p className="text-slate-600 dark:text-slate-500 text-xs font-medium uppercase tracking-wider mb-1">
+        <p className="text-slate-600 dark:text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">
           Parameters
         </p>
         <ul className="text-sm space-y-0.5">
@@ -196,7 +200,7 @@ function ParameterHintPopover({
               className={
                 i === paramIndex
                   ? "text-cyan-300 font-medium"
-                  : "text-slate-600 dark:text-slate-500"
+                  : "text-slate-600 dark:text-slate-400"
               }
             >
               {i + 1}. {p.name}{" "}
@@ -254,7 +258,7 @@ function FunctionListPopover({
       style={popoverStyle}
       role="listbox"
     >
-      <div className="flex items-center justify-between gap-2 text-slate-600 dark:text-slate-500 text-xs font-medium uppercase tracking-wider px-3 py-2 border-b border-slate-200 dark:border-slate-700">
+      <div className="flex items-center justify-between gap-2 text-slate-600 dark:text-slate-400 text-xs font-medium uppercase tracking-wider px-3 py-2 border-b border-slate-200 dark:border-slate-700">
         <span>Functions</span>
         <button
           type="button"
@@ -299,7 +303,7 @@ function FunctionListPopover({
                 {name}
               </span>
               {meta && (
-                <span className="text-slate-600 dark:text-slate-500 text-xs truncate flex-1">
+                <span className="text-slate-600 dark:text-slate-400 text-xs truncate flex-1">
                   {meta.signature}
                 </span>
               )}

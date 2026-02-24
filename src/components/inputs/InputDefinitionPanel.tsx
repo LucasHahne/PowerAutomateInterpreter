@@ -49,7 +49,7 @@ export function InputDefinitionPanel({
       </div>
       <div className="flex flex-col gap-2 overflow-y-auto flex-1 min-h-0">
         {Object.entries(entries).length === 0 ? (
-          <p className="text-slate-600 dark:text-slate-500 text-sm py-4">
+          <p className="text-slate-600 dark:text-slate-400 text-sm py-4">
             No variables. Click Add to create one.
           </p>
         ) : (

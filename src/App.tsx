@@ -19,7 +19,8 @@ function App() {
     useInterpreter();
   const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
   const [selectedVariable, setSelectedVariable] = useState<string | null>(null);
-  const [variablePreviewValue, setVariablePreviewValue] = useState<unknown>(undefined);
+  const [variablePreviewValue, setVariablePreviewValue] =
+    useState<unknown>(undefined);
   const intellisensePortalRef = useRef<HTMLDivElement>(null);
 
   const handleVariableClick = useCallback((name: string) => {
@@ -56,7 +57,7 @@ function App() {
       });
       setSelectedVariable(null);
     },
-    [selectedVariable, setContext]
+    [selectedVariable, setContext],
   );
 
   const handleRemoveVariable = useCallback(
@@ -68,7 +69,7 @@ function App() {
       });
       setSelectedVariable(null);
     },
-    [setContext]
+    [setContext],
   );
 
   const handleCancelVariable = useCallback(() => {
@@ -90,8 +91,10 @@ function App() {
       <FunctionReferencePanel selectedFunction={selectedFunction} />
     ) : (
       <div className="panel p-4 flex flex-col h-full">
-        <h3 className="text-slate-700 dark:text-slate-300 font-medium mb-3">Reference</h3>
-        <p className="text-slate-600 dark:text-slate-500 text-sm">
+        <h3 className="text-slate-700 dark:text-slate-300 font-medium mb-3">
+          Reference
+        </h3>
+        <p className="text-slate-600 dark:text-slate-400 text-sm">
           Click a variable or a function in the expression to see its details.
         </p>
       </div>
@@ -105,8 +108,8 @@ function App() {
       <div
         className={`h-full min-h-0 grid gap-4 lg:gap-6 grid-rows-1 ${
           showVariableValuePanel
-            ? 'grid-cols-1 lg:grid-cols-[1fr_minmax(300px,400px)_minmax(280px,360px)]'
-            : 'grid-cols-1 lg:grid-cols-[1fr_minmax(300px,400px)]'
+            ? "grid-cols-1 lg:grid-cols-[1fr_minmax(300px,400px)_minmax(280px,360px)]"
+            : "grid-cols-1 lg:grid-cols-[1fr_minmax(300px,400px)]"
         }`}
       >
         {/* Left column: Variables (fixed height), Expression (grows with textarea), Result (fills rest). Column scrolls when needed. */}
@@ -149,8 +152,8 @@ function App() {
         <div
           className={`min-h-[320px] lg:min-h-full lg:h-full flex flex-col order-2 rounded-2xl transition-all duration-200 ${
             selectedVariable === NEW_VARIABLE_SENTINEL
-              ? 'border border-cyan-500/40 shadow-[0_0_24px_rgba(34,211,238,0.12)]'
-              : 'border border-transparent'
+              ? "border border-cyan-500/40 shadow-[0_0_24px_rgba(34,211,238,0.12)]"
+              : "border border-transparent"
           }`}
         >
           <div className="h-full min-h-0 flex flex-col overflow-hidden rounded-2xl">
