@@ -36,10 +36,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
       { name: "...", type: "string", required: false },
     ],
     returns: "string",
-    examples: [
-      { expression: "concat('Hello', ' ', 'World')", result: "'Hello World'" },
-      { expression: "concat('a', 'b', 'c')", result: "'abc'" },
-    ],
+    examples: [{ expression: "concat('Hello', 'World')", result: "\"HelloWorld\"" }],
     docsUrl: `${BASE}#concat`,
   },
   toLower: {
@@ -50,7 +47,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     parameters: [{ name: "text", type: "string", required: true }],
     returns: "string",
     examples: [
-      { expression: "toLower('Hello World')", result: "'hello world'" },
+      { expression: "toLower('Hello')", result: "\"hello\"" },
       { expression: "toLower('POWER AUTOMATE')", result: "'power automate'" },
     ],
     docsUrl: `${BASE}#toLower`,
@@ -78,10 +75,45 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "integer",
     examples: [
-      { expression: "length('hello')", result: "5" },
-      { expression: "length(createArray('a', 'b', 'c'))", result: "3" },
+      { expression: "length('abcd')", result: "4" },
+      { expression: "length(createArray(0, 1, 2, 3))", result: "4" },
     ],
     docsUrl: `${BASE}#length`,
+  },
+  indexOf: {
+    name: "indexOf",
+    category: "String",
+    description:
+      "Return the index of the first occurrence of a substring (case-insensitive).",
+    signature: "indexOf(text, searchText)",
+    parameters: [
+      { name: "text", type: "string", required: true },
+      { name: "searchText", type: "string", required: true },
+    ],
+    returns: "integer",
+    examples: [
+      { expression: "indexOf('hello world', 'world')", result: "6" },
+      { expression: "indexOf('hello', 'xyz')", result: "-1" },
+    ],
+    docsUrl: `${BASE}#indexof`,
+  },
+  slice: {
+    name: "slice",
+    category: "String",
+    description:
+      "Return a substring from the specified start index to the end index (exclusive).",
+    signature: "slice(text, startIndex, endIndex?)",
+    parameters: [
+      { name: "text", type: "string", required: true },
+      { name: "startIndex", type: "integer", required: true },
+      { name: "endIndex", type: "integer", required: false },
+    ],
+    returns: "string",
+    examples: [
+      { expression: "slice('Hello World', 2)", result: "'llo World'" },
+      { expression: "slice('Hello World', 2, 5)", result: "'llo'" },
+    ],
+    docsUrl: `${BASE}#slice`,
   },
   substring: {
     name: "substring",
@@ -96,8 +128,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "string",
     examples: [
-      { expression: "substring('hello', 1, 3)", result: "'ell'" },
-      { expression: "substring('hello', 0, 2)", result: "'he'" },
+      { expression: "substring('hello world', 6, 5)", result: "\"world\"" },
     ],
     docsUrl: `${BASE}#substring`,
   },
@@ -135,12 +166,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     returns: "string",
     examples: [
       {
-        expression: "replace('hello world', 'world', 'there')",
-        result: "'hello there'",
-      },
-      {
-        expression: "replace('foo bar foo', 'foo', 'baz')",
-        result: "'baz bar baz'",
+        expression: "replace('the old string', 'old', 'new')",
+        result: "\"the new string\"",
       },
     ],
     docsUrl: `${BASE}#replace`,
@@ -154,8 +181,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     parameters: [{ name: "text", type: "string", required: true }],
     returns: "string",
     examples: [
-      { expression: "trim('  hello  ')", result: "'hello'" },
-      { expression: "trim('\\t  spaces  \\t')", result: "'spaces'" },
+      { expression: "trim(' Hello World  ')", result: "\"Hello World\"" },
     ],
     docsUrl: `${BASE}#trim`,
   },
@@ -188,8 +214,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "boolean",
     examples: [
-      { expression: "endsWith('hello', 'lo')", result: "true" },
-      { expression: "endsWith('hello', 'he')", result: "false" },
+      { expression: "endsWith('hello world', 'world')", result: "true" },
+      { expression: "endsWith('hello world', 'universe')", result: "false" },
     ],
     docsUrl: `${BASE}#endswith`,
   },
@@ -208,9 +234,17 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     examples: [
       {
         expression: "formatNumber(1234567890, '#,##0.00', 'en-US')",
-        result: "'1,234,567,890.00'",
+        result: "\"1,234,567,890.00\"",
       },
-      { expression: "formatNumber(17.35, 'C2')", result: "'$17.35'" },
+      {
+        expression: "formatNumber(1234567890, '#,##0.00', 'is-IS')",
+        result: "\"1.234.567.890,00\"",
+      },
+      { expression: "formatNumber(17.35, 'C2')", result: "\"$17.35\"" },
+      {
+        expression: "formatNumber(17.35, 'C2', 'is-IS')",
+        result: "\"17,35 kr.\"",
+      },
     ],
     docsUrl: `${BASE}#formatNumber`,
   },
@@ -240,7 +274,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     parameters: [{ name: "string", type: "string", required: true }],
     returns: "boolean",
     examples: [
-      { expression: "isInt('123')", result: "true" },
+      { expression: "isInt('10')", result: "true" },
       { expression: "isInt('12.5')", result: "false" },
     ],
     docsUrl: `${BASE}#isInt`,
@@ -284,6 +318,25 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     docsUrl: `${BASE}#nthIndexOf`,
   },
+  guid: {
+    name: "guid",
+    category: "String",
+    description: "Generate a globally unique identifier (GUID) as a string.",
+    signature: "guid()",
+    parameters: [],
+    returns: "string",
+    examples: [
+      {
+        expression: "guid()",
+        result: "\"c2ecc88d-88c8-4096-912c-d6f2e2b138ce\" (example)",
+      },
+      {
+        expression: "guid('P')",
+        result: "\"(c2ecc88d-88c8-4096-912c-d6f2e2b138ce)\" (example)",
+      },
+    ],
+    docsUrl: `${BASE}#guid`,
+  },
   // Math functions
   add: {
     name: "add",
@@ -295,10 +348,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
       { name: "summand2", type: "number", required: true },
     ],
     returns: "number",
-    examples: [
-      { expression: "add(1, 2)", result: "3" },
-      { expression: "add(10, -3)", result: "7" },
-    ],
+    examples: [{ expression: "add(1, 1.5)", result: "2.5" }],
     docsUrl: `${BASE}#add`,
   },
   sub: {
@@ -312,10 +362,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
       { name: "subtrahend", type: "number", required: true },
     ],
     returns: "number",
-    examples: [
-      { expression: "sub(10, 3)", result: "7" },
-      { expression: "sub(0, 5)", result: "-5" },
-    ],
+    examples: [{ expression: "sub(10.3, 0.3)", result: "10" }],
     docsUrl: `${BASE}#sub`,
   },
   mul: {
@@ -329,8 +376,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "number",
     examples: [
-      { expression: "mul(4, 5)", result: "20" },
-      { expression: "mul(-2, 3)", result: "-6" },
+      { expression: "mul(1, 2)", result: "2" },
+      { expression: "mul(1.5, 2)", result: "3" },
     ],
     docsUrl: `${BASE}#mul`,
   },
@@ -345,8 +392,10 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "number",
     examples: [
-      { expression: "div(10, 2)", result: "5" },
-      { expression: "div(7, 2)", result: "3.5" },
+      { expression: "div(10, 5)", result: "2" },
+      { expression: "div(11, 5)", result: "2" },
+      { expression: "div(11, 5.0)", result: "2.2" },
+      { expression: "div(11.0, 5)", result: "2.2" },
     ],
     docsUrl: `${BASE}#div`,
   },
@@ -361,8 +410,9 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "number",
     examples: [
-      { expression: "mod(10, 3)", result: "1" },
-      { expression: "mod(8, 4)", result: "0" },
+      { expression: "mod(3, 2)", result: "1" },
+      { expression: "mod(-5, 2)", result: "-1" },
+      { expression: "mod(4, -3)", result: "1" },
     ],
     docsUrl: `${BASE}#mod`,
   },
@@ -373,6 +423,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     signature: "min(number1, number2, ...) or min(array)",
     parameters: [
       { name: "numbers or array", type: "number | array", required: true },
+      { name: "...", type: "number", required: false },
     ],
     returns: "number",
     examples: [
@@ -388,6 +439,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     signature: "max(number1, number2, ...) or max(array)",
     parameters: [
       { name: "numbers or array", type: "number | array", required: true },
+      { name: "...", type: "number", required: false },
     ],
     returns: "number",
     examples: [
@@ -488,8 +540,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "boolean",
     examples: [
-      { expression: "equals('hello', 'hello')", result: "true" },
-      { expression: "equals(1, '1')", result: "false" },
+      { expression: "equals(true, 1)", result: "true" },
+      { expression: "equals('abc', 'abcd')", result: "false" },
     ],
     docsUrl: `${BASE}#equals`,
   },
@@ -539,7 +591,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     returns: "boolean",
     examples: [
       { expression: "less(5, 10)", result: "true" },
-      { expression: "less(10, 5)", result: "false" },
+      { expression: "less('banana', 'apple')", result: "false" },
     ],
     docsUrl: `${BASE}#less`,
   },
@@ -590,6 +642,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     returns: "any",
     examples: [
       { expression: "coalesce(null, true, false)", result: "true" },
+      { expression: "coalesce(null, 'hello', 'world')", result: "\"hello\"" },
       { expression: "coalesce(null, null, null)", result: "null" },
     ],
     docsUrl: `${BASE}#coalesce`,
@@ -625,8 +678,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     returns: "object",
     examples: [
       {
-        expression: "removeProperty(json('{\"a\": 1, \"b\": 2}'), 'b')",
-        result: "{ a: 1 }",
+        expression: "removeProperty(json('{ \"firstName\": \"Sophia\", \"middleName\": \"Anne\", \"surName\": \"Owen\" }'), 'middleName')",
+        result: "{ firstName: 'Sophia', surName: 'Owen' }",
       },
     ],
     docsUrl: `${BASE}#removeProperty`,
@@ -659,7 +712,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     parameters: [{ name: "value", type: "string | number", required: true }],
     returns: "integer",
     examples: [
-      { expression: "int('123')", result: "123" },
+      { expression: "int('10')", result: "10" },
       { expression: "int(45.9)", result: "45" },
     ],
     docsUrl: `${BASE}#int`,
@@ -668,12 +721,15 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     name: "float",
     category: "Conversion",
     description: "Return the floating-point number for an input value.",
-    signature: "float(value)",
-    parameters: [{ name: "value", type: "string | number", required: true }],
+    signature: "float(value, locale?)",
+    parameters: [
+      { name: "value", type: "string | number", required: true },
+      { name: "locale", type: "string", required: false },
+    ],
     returns: "number",
     examples: [
-      { expression: "float('3.14')", result: "3.14" },
-      { expression: "float('42')", result: "42" },
+      { expression: "float('10,000.333')", result: "10000.333" },
+      { expression: "float('10.000,333', 'de-DE')", result: "10000.333" },
     ],
     docsUrl: `${BASE}#float`,
   },
@@ -698,8 +754,10 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     parameters: [{ name: "value", type: "any", required: true }],
     returns: "boolean",
     examples: [
-      { expression: "bool('true')", result: "true" },
       { expression: "bool(1)", result: "true" },
+      { expression: "bool(0)", result: "false" },
+      { expression: "bool('true')", result: "true" },
+      { expression: "bool('false')", result: "false" },
     ],
     docsUrl: `${BASE}#bool`,
   },
@@ -711,8 +769,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     parameters: [{ name: "string", type: "string", required: true }],
     returns: "object | array",
     examples: [
-      { expression: "json('{\"a\": 1}')", result: "{ a: 1 }" },
-      { expression: 'json(\'["x", "y"]\')', result: "['x', 'y']" },
+      { expression: "json('[1, 2, 3]')", result: "[1, 2, 3]" },
+      { expression: "json('{\"fullName\": \"Sophia Owen\"}')", result: "{ fullName: 'Sophia Owen' }" },
     ],
     docsUrl: `${BASE}#json`,
   },
@@ -723,10 +781,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     signature: "array(value)",
     parameters: [{ name: "value", type: "any", required: true }],
     returns: "array",
-    examples: [
-      { expression: "array('hello')", result: "['hello']" },
-      { expression: "array(42)", result: "[42]" },
-    ],
+    examples: [{ expression: "array('hello')", result: "[\"hello\"]" }],
     docsUrl: `${BASE}#array`,
   },
   createArray: {
@@ -737,8 +792,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     parameters: [{ name: "...", type: "any", required: false }],
     returns: "array",
     examples: [
-      { expression: "createArray('a', 'b', 'c')", result: "['a', 'b', 'c']" },
-      { expression: "createArray(1, 2, 3)", result: "[1, 2, 3]" },
+      { expression: "createArray('h', 'e', 'l', 'l', 'o')", result: "[\"h\", \"e\", \"l\", \"l\", \"o\"]" },
     ],
     docsUrl: `${BASE}#createArray`,
   },
@@ -769,7 +823,12 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     signature: "base64ToBinary(value)",
     parameters: [{ name: "value", type: "string", required: true }],
     returns: "string",
-    examples: [{ expression: "base64ToBinary('aGVsbG8=')", result: "'hello'" }],
+    examples: [
+      {
+        expression: "base64ToBinary('aGVsbG8=')",
+        result: "\"0110100001100101011011000110110001101111\"",
+      },
+    ],
     docsUrl: `${BASE}#base64ToBinary`,
   },
   binary: {
@@ -897,7 +956,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     examples: [
       {
         expression: "dataUriToBinary('data:text/plain;charset=utf-8;base64,aGVsbG8=')",
-        result: "'hello'",
+        result: "\"0110100001100101011011000110110001101111\"",
       },
     ],
     docsUrl: `${BASE}#dataUriToBinary`,
@@ -912,7 +971,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     examples: [
       {
         expression: "decodeDataUri('data:text/plain;charset=utf-8;base64,aGVsbG8=')",
-        result: "'hello'",
+        result: "\"0110100001100101011011000110110001101111\"",
       },
     ],
     docsUrl: `${BASE}#decodeDataUri`,
@@ -1033,8 +1092,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "string | any",
     examples: [
-      { expression: "first('hello')", result: "'h'" },
-      { expression: "first(createArray('a', 'b', 'c'))", result: "'a'" },
+      { expression: "first('hello')", result: "\"h\"" },
+      { expression: "first(createArray(0, 1, 2))", result: "0" },
     ],
     docsUrl: `${BASE}#first`,
   },
@@ -1048,8 +1107,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "string | any",
     examples: [
-      { expression: "last('hello')", result: "'o'" },
-      { expression: "last(createArray('a', 'b', 'c'))", result: "'c'" },
+      { expression: "last('abcd')", result: "\"d\"" },
+      { expression: "last(createArray(0, 1, 2, 3))", result: "3" },
     ],
     docsUrl: `${BASE}#last`,
   },
@@ -1066,10 +1125,9 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     returns: "string",
     examples: [
       {
-        expression: "join(createArray('a', 'b', 'c'), ', ')",
-        result: "'a, b, c'",
+        expression: "join(createArray('a', 'b', 'c'), '.')",
+        result: "\"a.b.c\"",
       },
-      { expression: "join(createArray(1, 2, 3), '-')", result: "'1-2-3'" },
     ],
     docsUrl: `${BASE}#join`,
   },
@@ -1120,8 +1178,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "boolean",
     examples: [
-      { expression: "contains('hello', 'ell')", result: "true" },
-      { expression: "contains(createArray('a', 'b'), 'a')", result: "true" },
+      { expression: "contains('hello world', 'world')", result: "true" },
+      { expression: "contains('hello world', 'universe')", result: "false" },
     ],
     docsUrl: `${BASE}#contains`,
   },
@@ -1136,7 +1194,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     returns: "boolean",
     examples: [
       { expression: "empty('')", result: "true" },
-      { expression: "empty('hello')", result: "false" },
+      { expression: "empty('abc')", result: "false" },
     ],
     docsUrl: `${BASE}#empty`,
   },
@@ -1178,13 +1236,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     returns: "array",
     examples: [
       {
-        expression: "intersection(createArray(1, 2), createArray(2, 3))",
-        result: "[2]",
-      },
-      {
-        expression:
-          "intersection(createArray('a', 'b'), createArray('b', 'c'))",
-        result: "['b']",
+        expression: "intersection(createArray(1, 2, 3), createArray(101, 2, 1, 10), createArray(6, 8, 1, 2))",
+        result: "[1, 2]",
       },
     ],
     docsUrl: `${BASE}#intersection`,
@@ -1283,12 +1336,12 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     returns: "string",
     examples: [
       {
-        expression: "addDays('2025-02-16', 7, 'yyyy-MM-dd')",
-        result: "'2025-02-23'",
+        expression: "addDays('2018-03-15T00:00:00Z', 10)",
+        result: "\"2018-03-25T00:00:00.0000000Z\"",
       },
       {
-        expression: "addDays('2025-01-31', 3, 'yyyy-MM-dd')",
-        result: "'2025-02-03'",
+        expression: "addDays('2018-03-15T00:00:00Z', -5)",
+        result: "\"2018-03-10T00:00:00.0000000Z\"",
       },
     ],
     docsUrl: `${BASE}#addDays`,
@@ -1306,12 +1359,12 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     returns: "string",
     examples: [
       {
-        expression: "addHours('2025-02-16T10:00:00', 2, 'yyyy-MM-ddTHH:mm:ss')",
-        result: "'2025-02-16T12:00:00'",
+        expression: "addHours('2018-03-15T00:00:00Z', 10)",
+        result: "\"2018-03-15T10:00:00.0000000Z\"",
       },
       {
-        expression: "addHours('2025-02-16T23:00:00', 3)",
-        result: "'2025-02-17T02:00:00'",
+        expression: "addHours('2018-03-15T15:00:00Z', -5)",
+        result: "\"2018-03-15T10:00:00.0000000Z\"",
       },
     ],
     docsUrl: `${BASE}#addHours`,
@@ -1320,21 +1373,18 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     name: "formatDateTime",
     category: "DateTime",
     description: "Return the date from a timestamp in the specified format.",
-    signature: "formatDateTime(timestamp, format?)",
+    signature: "formatDateTime(timestamp, format?, locale?)",
     parameters: [
       { name: "timestamp", type: "string", required: true },
       { name: "format", type: "string", required: false },
+      { name: "locale", type: "string", required: false },
     ],
     returns: "string",
     examples: [
-      {
-        expression: "formatDateTime('2025-02-16T14:30:00', 'yyyy-MM-dd')",
-        result: "'2025-02-16'",
-      },
-      {
-        expression: "formatDateTime('2025-02-16T14:30:00', 'HH:mm')",
-        result: "'14:30'",
-      },
+      { expression: "formatDateTime('03/15/2018')", result: "'2018-03-15T00:00:00.0000000'" },
+      { expression: "formatDateTime('03/15/2018 12:00:00', 'yyyy-MM-ddTHH:mm:ss')", result: "'2018-03-15T12:00:00'" },
+      { expression: "formatDateTime('01/31/2016', 'dddd MMMM d')", result: "'Sunday January 31'" },
+      { expression: "formatDateTime('01/31/2016', 'dddd MMMM d', 'fr-fr')", result: "'dimanche janvier 31'" },
     ],
     docsUrl: `${BASE}#formatDateTime`,
   },
@@ -1372,7 +1422,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "string",
     examples: [
-      { expression: "addMinutes('2018-03-15T00:10:00Z', 10)", result: "'2018-03-15T00:20:00Z'" },
+      { expression: "addMinutes('2018-03-15T00:10:00Z', 10)", result: "\"2018-03-15T00:20:00.0000000Z\"" },
+      { expression: "addMinutes('2018-03-15T00:20:00Z', -5)", result: "\"2018-03-15T00:15:00.0000000Z\"" },
     ],
     docsUrl: `${BASE}#addMinutes`,
   },
@@ -1388,7 +1439,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "string",
     examples: [
-      { expression: "addSeconds('2018-03-15T00:00:00Z', 10)", result: "'2018-03-15T00:00:10Z'" },
+      { expression: "addSeconds('2018-03-15T00:00:00Z', 10)", result: "\"2018-03-15T00:00:10.0000000Z\"" },
+      { expression: "addSeconds('2018-03-15T00:00:30Z', -5)", result: "\"2018-03-15T00:00:25.0000000Z\"" },
     ],
     docsUrl: `${BASE}#addSeconds`,
   },
@@ -1489,7 +1541,7 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     parameters: [{ name: "timestamp", type: "string", required: true }],
     returns: "integer",
     examples: [
-      { expression: "dayOfWeek('2018-03-15T13:27:36Z')", result: "4 (Thursday)" },
+      { expression: "dayOfWeek('2018-03-15T13:27:36Z')", result: "4" },
     ],
     docsUrl: `${BASE}#dayOfWeek`,
   },
@@ -1573,7 +1625,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "string",
     examples: [
-      { expression: "convertFromUtc('2018-01-01T00:00:00Z', 'America/Los_Angeles')", result: "Time in PST" },
+      { expression: "convertFromUtc('2018-01-01T08:00:00.0000000Z', 'Pacific Standard Time')", result: "\"2018-01-01T00:00:00.0000000\"" },
+      { expression: "convertFromUtc('2018-01-01T08:00:00.0000000Z', 'Pacific Standard Time', 'D')", result: "\"Monday, January 1, 2018\"" },
     ],
     docsUrl: `${BASE}#convertFromUtc`,
   },
@@ -1590,7 +1643,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "string",
     examples: [
-      { expression: "convertTimeZone('2018-01-01T00:00:00Z', 'UTC', 'America/Los_Angeles')", result: "Time in PST" },
+      { expression: "convertTimeZone('2018-01-01T08:00:00.0000000Z', 'UTC', 'Pacific Standard Time')", result: "\"2018-01-01T00:00:00.0000000\"" },
+      { expression: "convertTimeZone('2018-01-01T08:00:00.0000000Z', 'UTC', 'Pacific Standard Time', 'D')", result: "\"Monday, January 1, 2018\"" },
     ],
     docsUrl: `${BASE}#convertTimeZone`,
   },
@@ -1606,7 +1660,8 @@ export const FUNCTION_METADATA: Record<string, FunctionMetadata> = {
     ],
     returns: "string",
     examples: [
-      { expression: "convertToUtc('2018-01-01T00:00:00', 'America/Los_Angeles')", result: "UTC equivalent" },
+      { expression: "convertToUtc('01/01/2018 00:00:00', 'Pacific Standard Time')", result: "\"2018-01-01T08:00:00.0000000Z\"" },
+      { expression: "convertToUtc('01/01/2018 00:00:00', 'Pacific Standard Time', 'D')", result: "\"Monday, January 1, 2018\"" },
     ],
     docsUrl: `${BASE}#convertToUtc`,
   },

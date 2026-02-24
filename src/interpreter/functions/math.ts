@@ -32,9 +32,13 @@ export const mathFunctions: Record<
   div: (args) => {
     /* c8 ignore next */
     if (args.length !== 2) throw new TypeError("div expects 2 arguments");
-    const b = toNumber(args[1]);
-    if (b === 0) throw new Error("Division by zero");
-    return toNumber(args[0]) / b;
+    const a = args[0];
+    const b = args[1];
+    const na = toNumber(a);
+    const nb = toNumber(b);
+    if (nb === 0) throw new Error("Division by zero");
+    const bothInt = Number.isInteger(na) && Number.isInteger(nb);
+    return bothInt ? Math.trunc(na / nb) : na / nb;
   },
   mod: (args) => {
     /* c8 ignore next */
@@ -67,5 +71,15 @@ export const mathFunctions: Record<
     if (min >= max)
       throw new TypeError("rand minValue must be less than maxValue");
     return Math.floor(Math.random() * (max - min)) + min;
+  },
+  range: (args) => {
+    /* c8 ignore next */
+    if (args.length !== 2) throw new TypeError("range expects 2 arguments");
+    const start = Math.floor(toNumber(args[0]));
+    const count = Math.floor(toNumber(args[1]));
+    if (count < 0) throw new TypeError("range count must be non-negative");
+    const out: number[] = [];
+    for (let i = 0; i < count; i++) out.push(start + i);
+    return out;
   },
 };

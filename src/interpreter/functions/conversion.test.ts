@@ -14,6 +14,11 @@ describe('Conversion functions', () => {
   it('float', () => {
     expect(interpret('float(3)', ctx)).toMatchObject({ success: true, value: 3 });
     expect(interpret("float('3.14')", ctx)).toMatchObject({ success: true, value: 3.14 });
+    // de-DE uses comma as decimal separator
+    expect(interpret("float('1234,56', 'de-DE')", ctx)).toMatchObject({
+      success: true,
+      value: 1234.56,
+    });
   });
 
   it('string', () => {
@@ -57,7 +62,9 @@ describe('Conversion functions', () => {
     expect(interpret("base64ToString('aGVsbG8=')", ctx)).toMatchObject({ success: true, value: 'hello' });
   });
   it('base64ToBinary', () => {
-    expect(interpret("base64ToBinary('aGVsbG8=')", ctx)).toMatchObject({ success: true, value: 'hello' });
+    // Reference: binary as string of 0/1 (each byte = 8 bits). "hello" = 5 bytes.
+    const helloBinary = '0110100001100101011011000110110001101111';
+    expect(interpret("base64ToBinary('aGVsbG8=')", ctx)).toMatchObject({ success: true, value: helloBinary });
   });
   it('binary', () => {
     expect(interpret("binary('hello')", ctx)).toMatchObject({ success: true, value: 'aGVsbG8=' });
@@ -104,14 +111,16 @@ describe('Conversion functions', () => {
     ).toMatchObject({ success: true, value: 'hello' });
   });
   it('dataUriToBinary', () => {
+    const helloBinary = '0110100001100101011011000110110001101111';
     expect(
       interpret("dataUriToBinary('data:text/plain;charset=utf-8;base64,aGVsbG8=')", ctx),
-    ).toMatchObject({ success: true, value: 'hello' });
+    ).toMatchObject({ success: true, value: helloBinary });
   });
   it('decodeDataUri', () => {
+    const helloBinary = '0110100001100101011011000110110001101111';
     expect(
       interpret("decodeDataUri('data:text/plain;charset=utf-8;base64,aGVsbG8=')", ctx),
-    ).toMatchObject({ success: true, value: 'hello' });
+    ).toMatchObject({ success: true, value: helloBinary });
   });
   it('decimal', () => {
     expect(interpret("decimal('1.2345678912312131')", ctx)).toMatchObject({
@@ -129,11 +138,19 @@ describe('Conversion functions', () => {
     expect(
       interpret("uriPath('https://www.contoso.com/catalog/shownew.htm?date=today')", ctx),
     ).toMatchObject({ success: true, value: '/catalog/shownew.htm' });
+    expect(interpret("uriPath('https://example.com')", ctx)).toMatchObject({
+      success: true,
+      value: '/',
+    });
   });
   it('uriPathAndQuery', () => {
     expect(
       interpret("uriPathAndQuery('https://www.contoso.com/catalog/shownew.htm?date=today')", ctx),
     ).toMatchObject({ success: true, value: '/catalog/shownew.htm?date=today' });
+    expect(interpret("uriPathAndQuery('https://example.com?foo=bar')", ctx)).toMatchObject({
+      success: true,
+      value: '/?foo=bar',
+    });
   });
   it('uriPort', () => {
     expect(interpret("uriPort('https://www.localhost.com:8080')", ctx)).toMatchObject({

@@ -143,6 +143,10 @@ describe("String functions", () => {
       success: true,
       value: "$17.35",
     });
+    expect(interpret("formatNumber(100, 'C0', 'is-IS')", ctx)).toMatchObject({
+      success: true,
+      value: expect.stringMatching(/^100\s*kr\.?$/),
+    });
   });
 
   it("isFloat", () => {
@@ -180,5 +184,38 @@ describe("String functions", () => {
     expect(
       interpret("nthIndexOf('123456789123465789', '1', 2)", ctx),
     ).toMatchObject({ success: true, value: 9 });
+  });
+  it("indexOf", () => {
+    expect(interpret("indexOf('hello world', 'world')", ctx)).toMatchObject({
+      success: true,
+      value: 6,
+    });
+    expect(interpret("indexOf('hello', 'xyz')", ctx)).toMatchObject({
+      success: true,
+      value: -1,
+    });
+    expect(interpret("indexOf('Hello', 'ell')", ctx)).toMatchObject({
+      success: true,
+      value: 1,
+    });
+  });
+  it("slice", () => {
+    expect(interpret("slice('hello', 1, 4)", ctx)).toMatchObject({
+      success: true,
+      value: "ell",
+    });
+    expect(interpret("slice('hello', 2)", ctx)).toMatchObject({
+      success: true,
+      value: "llo",
+    });
+  });
+  it("guid", () => {
+    const r = interpret("guid()", ctx);
+    expect(r.success).toBe(true);
+    const v = (r as { value: string }).value;
+    expect(typeof v).toBe("string");
+    expect(v).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
   });
 });

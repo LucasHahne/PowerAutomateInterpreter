@@ -12,6 +12,21 @@ function base64ToString(b64: string): string {
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
   return new TextDecoder().decode(bytes);
 }
+/** Decode base64 to raw bytes (Uint8Array). */
+function base64ToBytes(b64: string): Uint8Array {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+/** Convert bytes to binary string (each byte as 8 "0"/"1" chars, MSB first). */
+function bytesToBinaryString(bytes: Uint8Array): string {
+  let out = '';
+  for (let i = 0; i < bytes.length; i++) {
+    for (let b = 7; b >= 0; b--) out += (bytes[i] >> b) & 1 ? '1' : '0';
+  }
+  return out;
+}
 export const conversionFunctions: Record<string, (args: unknown[], ctx: EvaluationContext) => unknown> = {
   int: (args) => {
     /* c8 ignore next */
@@ -25,10 +40,25 @@ export const conversionFunctions: Record<string, (args: unknown[], ctx: Evaluati
   },
   float: (args) => {
     /* c8 ignore next */
-    if (args.length !== 1) throw new TypeError('float expects 1 argument');
+    if (args.length < 1 || args.length > 2) throw new TypeError('float expects 1 or 2 arguments');
     const v = args[0];
     if (typeof v === 'number') return v;
-    const n = parseFloat(String(v).replace(/,/g, ''));
+    const s = String(v).trim();
+    const locale = args.length >= 2 ? String(args[1]) : undefined;
+    let numStr = s;
+    if (locale) {
+      const parts = new Intl.NumberFormat(locale, { maximumFractionDigits: 10 }).formatToParts(1000.1);
+      let group = ',';
+      let decimal = '.';
+      for (const p of parts) {
+        if (p.type === 'group') group = p.value;
+        if (p.type === 'decimal') decimal = p.value;
+      }
+      numStr = s.replace(new RegExp('\\' + group, 'g'), '').replace(decimal, '.');
+    } else {
+      numStr = s.replace(/,/g, '');
+    }
+    const n = parseFloat(numStr);
     /* c8 ignore next */
     if (isNaN(n)) throw new TypeError(`Cannot convert '${v}' to float`);
     return n;
@@ -84,7 +114,8 @@ export const conversionFunctions: Record<string, (args: unknown[], ctx: Evaluati
   base64ToBinary: (args) => {
     /* c8 ignore next */
     if (args.length !== 1) throw new TypeError('base64ToBinary expects 1 argument');
-    return base64ToString(String(args[0]));
+    const bytes = base64ToBytes(String(args[0]));
+    return bytesToBinaryString(bytes);
   },
   binary: (args) => {
     /* c8 ignore next */
@@ -135,7 +166,8 @@ export const conversionFunctions: Record<string, (args: unknown[], ctx: Evaluati
     const s = String(args[0]);
     const i = s.indexOf(',');
     if (i === -1) throw new TypeError('Invalid data URI');
-    return base64ToString(s.slice(i + 1));
+    const bytes = base64ToBytes(s.slice(i + 1));
+    return bytesToBinaryString(bytes);
   },
   decodeDataUri: (args) => {
     /* c8 ignore next */
@@ -143,7 +175,8 @@ export const conversionFunctions: Record<string, (args: unknown[], ctx: Evaluati
     const s = String(args[0]);
     const i = s.indexOf(',');
     if (i === -1) throw new TypeError('Invalid data URI');
-    return base64ToString(s.slice(i + 1));
+    const bytes = base64ToBytes(s.slice(i + 1));
+    return bytesToBinaryString(bytes);
   },
   decimal: (args) => {
     /* c8 ignore next */
@@ -160,13 +193,14 @@ export const conversionFunctions: Record<string, (args: unknown[], ctx: Evaluati
   uriPath: (args) => {
     /* c8 ignore next */
     if (args.length !== 1) throw new TypeError('uriPath expects 1 argument');
-    return new URL(String(args[0])).pathname;
+    const p = new URL(String(args[0])).pathname;
+    return p || '/';
   },
   uriPathAndQuery: (args) => {
     /* c8 ignore next */
     if (args.length !== 1) throw new TypeError('uriPathAndQuery expects 1 argument');
     const u = new URL(String(args[0]));
-    return u.pathname + (u.search || '');
+    return (u.pathname || '/') + (u.search || '');
   },
   uriPort: (args) => {
     /* c8 ignore next */

@@ -39,9 +39,18 @@ describe("Math functions", () => {
       success: true,
       value: 5,
     });
+    expect(interpret("div(11, 5)", ctx)).toMatchObject({
+      success: true,
+      value: 2,
+    });
     expect(interpret("div(7, 2)", ctx)).toMatchObject({
       success: true,
-      value: 3.5,
+      value: 3,
+    });
+    // When either operand is non-integer, result is float (e.g. 11/5.5)
+    expect(interpret("div(11, 5.5)", ctx)).toMatchObject({
+      success: true,
+      value: 2,
     });
   });
 
@@ -97,5 +106,15 @@ describe("Math functions", () => {
       expect(v).toBeGreaterThanOrEqual(1);
       expect(v).toBeLessThan(5);
     }
+  });
+  it("range", () => {
+    expect(interpret("range(1, 4)", ctx)).toMatchObject({
+      success: true,
+      value: [1, 2, 3, 4],
+    });
+    expect(interpret("range(0, 3)", ctx)).toMatchObject({
+      success: true,
+      value: [0, 1, 2],
+    });
   });
 });

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useTheme } from "../../context/ThemeContext";
 
-const APP_VERSION = "1.2.0.0";
+const APP_VERSION = "1.2.1.0";
 
 interface AppShellProps {
   children: ReactNode;

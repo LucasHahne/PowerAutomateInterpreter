@@ -6,6 +6,35 @@ function ensureString(val: unknown): string {
   return String(val);
 }
 
+const LOCALE_CURRENCY: Record<string, string> = {
+  "en-US": "USD",
+  "en-GB": "GBP",
+  "is-IS": "ISK",
+  "de-DE": "EUR",
+  "de-AT": "EUR",
+  "fr-FR": "EUR",
+  "es-ES": "EUR",
+  "it-IT": "EUR",
+  "ja-JP": "JPY",
+  "zh-CN": "CNY",
+  "pt-BR": "BRL",
+  "en-AU": "AUD",
+  "en-CA": "CAD",
+  "sv-SE": "SEK",
+  "nb-NO": "NOK",
+  "da-DK": "DKK",
+  "nl-NL": "EUR",
+  "pl-PL": "PLN",
+  "tr-TR": "TRY",
+  "ru-RU": "RUB",
+  "ko-KR": "KRW",
+  "hi-IN": "INR",
+};
+
+function localeToCurrency(locale: string): string {
+  return LOCALE_CURRENCY[locale] ?? "USD";
+}
+
 export const stringFunctions: Record<
   string,
   (args: unknown[], ctx: EvaluationContext) => unknown
@@ -34,6 +63,32 @@ export const stringFunctions: Record<
     if (Array.isArray(v)) return v.length;
     /* c8 ignore next */
     throw new TypeError("length expects string or array");
+  },
+  indexOf: (args) => {
+    /* c8 ignore next */
+    if (args.length !== 2) throw new TypeError("indexOf expects 2 arguments");
+    const text = ensureString(args[0]);
+    const search = ensureString(args[1]);
+    if (text === "" && search === "") return 0;
+    if (text === "") return -1;
+    if (search === "") return 0;
+    return text.toLowerCase().indexOf(search.toLowerCase());
+  },
+  slice: (args) => {
+    /* c8 ignore next */
+    if (args.length < 2 || args.length > 3)
+      throw new TypeError("slice expects 2 or 3 arguments");
+    const s = ensureString(args[0]);
+    const start = Number(args[1]);
+    if (!Number.isInteger(start))
+      throw new TypeError("slice startIndex must be integer");
+    if (args.length === 3) {
+      const end = Number(args[2]);
+      if (!Number.isInteger(end))
+        throw new TypeError("slice endIndex must be integer");
+      return s.slice(start, end);
+    }
+    return s.slice(start);
   },
   substring: (args) => {
     /* c8 ignore next */
@@ -98,9 +153,10 @@ export const stringFunctions: Record<
     if (fmt.startsWith("C") || fmt.startsWith("c")) {
       const decimals = fmt.length > 1 ? parseInt(fmt.slice(1), 10) : 2;
       const d = isNaN(decimals) ? 2 : decimals;
+      const currency = localeToCurrency(locale);
       return new Intl.NumberFormat(locale, {
         style: "currency",
-        currency: "USD",
+        currency,
         minimumFractionDigits: d,
         maximumFractionDigits: d,
       }).format(num);
@@ -172,5 +228,13 @@ export const stringFunctions: Record<
       if (pos === -1) return -1;
     }
     return pos;
+  },
+  guid: (args) => {
+    if (args.length !== 0) throw new TypeError("guid expects 0 arguments");
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
   },
 };

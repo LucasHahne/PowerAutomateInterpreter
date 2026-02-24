@@ -21,8 +21,8 @@ export const logicalFunctions: Record<string, (args: unknown[], ctx: EvaluationC
     if (args.length !== 2) throw new TypeError('equals expects 2 arguments');
     const a = args[0];
     const b = args[1];
-    if (typeof a === 'number' && typeof b === 'number') return a === b;
-    return String(a) === String(b);
+    // Loose equality per reference: equals(true, 1) => true
+    return a == b;
   },
   if: (args) => {
     /* c8 ignore next */
