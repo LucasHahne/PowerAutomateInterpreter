@@ -119,7 +119,6 @@ export function VariableInputPanel({
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. myVar"
             className="input-dark w-full"
-            disabled={!isNew}
             autoFocus={isNew}
           />
           {!nameValid && name.length > 0 && (

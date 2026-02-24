@@ -15,5 +15,11 @@ export function useInterpreter(initialContext?: EvaluationContext) {
     return result;
   }, [expression, context]);
 
-  return { context, setContext, expression, setExpression, output, run };
+  const runExpression = useCallback((expr: string) => {
+    const result = interpret(expr, context);
+    setOutput(result);
+    return result;
+  }, [context]);
+
+  return { context, setContext, expression, setExpression, output, run, runExpression };
 }

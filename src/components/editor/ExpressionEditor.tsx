@@ -9,12 +9,17 @@ import {
 import { getIntellisenseContext } from "../../editor/intellisenseContext";
 import type { IntellisenseContext } from "../../editor/intellisenseContext";
 import { IntellisenseDropdown, filterFunctions } from "./IntellisenseDropdown";
+import { SnippetsPopover } from "./ExpressionSnippets";
 
 interface ExpressionEditorProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   onFunctionClick?: (name: string) => void;
+  /** Called when user selects a snippet from the dropdown to insert into the editor */
+  onInsertSnippet?: (expression: string) => void;
+  /** Called when user presses Ctrl+Enter / Cmd+Enter to run the expression */
+  onRun?: () => void;
   /** Container to portal the intellisense popover into (e.g. next to Run button) */
   intellisensePortalRef?: React.RefObject<HTMLDivElement | null>;
 }
@@ -54,6 +59,8 @@ export function ExpressionEditor({
   onChange,
   placeholder,
   onFunctionClick,
+  onInsertSnippet,
+  onRun,
   intellisensePortalRef,
 }: ExpressionEditorProps) {
   const preRef = useRef<HTMLPreElement>(null);
@@ -64,6 +71,7 @@ export function ExpressionEditor({
   const [intellisenseSelectedIndex, setIntellisenseSelectedIndex] = useState(0);
   const [intellisenseDismissed, setIntellisenseDismissed] = useState(false);
   const [forceShowFunctionList, setForceShowFunctionList] = useState(false);
+  const [forceShowSnippetsList, setForceShowSnippetsList] = useState(false);
   const [, setPortalMounted] = useState(false);
 
   useEffect(() => {
@@ -129,6 +137,11 @@ export function ExpressionEditor({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (onRun && (e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        onRun();
+        return;
+      }
       if (showFunctionList && filteredNames.length > 0) {
         if (e.key === "ArrowDown") {
           e.preventDefault();
@@ -165,6 +178,7 @@ export function ExpressionEditor({
       }
     },
     [
+      onRun,
       showFunctionList,
       filteredNames,
       intellisenseSelectedIndex,
@@ -267,27 +281,55 @@ export function ExpressionEditor({
   }, []);
 
   const handleCloseIntellisense = useCallback(() => {
+    // #region agent log
+    fetch("http://127.0.0.1:7243/ingest/1f982de4-7c53-4b23-aef2-1db901e4f1b1", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "56d1b9" },
+      body: JSON.stringify({
+        sessionId: "56d1b9",
+        location: "ExpressionEditor.tsx:handleCloseIntellisense",
+        message: "handleCloseIntellisense called",
+        data: { hypothesisId: "H2" },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
     setIntellisenseDismissed(true);
     setForceShowFunctionList(false);
+    setForceShowSnippetsList(false);
   }, []);
 
   const handleExpandFunctions = useCallback(() => {
     setForceShowFunctionList(true);
+    setForceShowSnippetsList(false);
     setIntellisenseDismissed(false);
   }, []);
 
-  // Dismiss intellisense when clicking outside the textarea or the popup (portal container)
+  const handleExpandSnippets = useCallback(() => {
+    setForceShowSnippetsList(true);
+    setForceShowFunctionList(false);
+    setIntellisenseDismissed(false);
+  }, []);
+
+  // Dismiss intellisense/snippets when clicking outside the textarea or the popup (portal container).
+  // Use capture phase so we run before other handlers and close on first click.
   useEffect(() => {
-    if (!intellisenseContext || !intellisensePortalRef) return;
+    if ((!intellisenseContext && !forceShowSnippetsList) || !intellisensePortalRef)
+      return;
     const handleMouseDown = (e: MouseEvent) => {
       const target = e.target as Node;
       if (textareaRef.current?.contains(target)) return;
       if (intellisensePortalRef.current?.contains(target)) return;
       handleCloseIntellisense();
     };
-    document.addEventListener("mousedown", handleMouseDown);
-    return () => document.removeEventListener("mousedown", handleMouseDown);
-  }, [intellisenseContext, intellisensePortalRef, handleCloseIntellisense]);
+    document.addEventListener("mousedown", handleMouseDown, true);
+    return () => document.removeEventListener("mousedown", handleMouseDown, true);
+  }, [
+    intellisenseContext,
+    forceShowSnippetsList,
+    intellisensePortalRef,
+    handleCloseIntellisense,
+  ]);
 
   const isUnknownFunction =
     intellisenseContext?.kind === "parameter-hint" &&
@@ -297,6 +339,7 @@ export function ExpressionEditor({
   const showExpandButton =
     (!intellisenseContext || isUnknownFunction || isFunctionListWithNoMatches) &&
     intellisensePortalRef?.current;
+  const showButtonsRow = showExpandButton || forceShowSnippetsList;
 
   return (
     <div className="relative">
@@ -326,7 +369,7 @@ export function ExpressionEditor({
         style={{ color: "transparent", minHeight: MIN_HEIGHT }}
         rows={1}
       />
-      {intellisenseContext && (
+      {intellisenseContext && !forceShowSnippetsList && (
         <IntellisenseDropdown
           context={intellisenseContext}
           anchorRef={textareaRef}
@@ -340,31 +383,72 @@ export function ExpressionEditor({
           onClose={handleCloseIntellisense}
         />
       )}
-      {showExpandButton &&
+      {showButtonsRow &&
+        intellisensePortalRef &&
         intellisensePortalRef.current &&
         createPortal(
-          <button
-            type="button"
-            onClick={handleExpandFunctions}
-            className="btn-secondary text-sm h-[32px] w-[130px] flex items-center justify-center gap-2"
-            aria-label="Show functions"
-          >
-            <svg
-              className="w-4 h-4 text-cyan-400 shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden
+          <div className="flex items-end gap-2">
+            <button
+              type="button"
+              onClick={handleExpandFunctions}
+              className="btn-secondary text-sm h-[32px] w-[130px] flex items-center justify-center gap-2"
+              aria-label="Show functions"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-            <span>Functions</span>
-          </button>,
+              <svg
+                className="w-4 h-4 text-cyan-400 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+              <span>Functions</span>
+            </button>
+            {onInsertSnippet && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={handleExpandSnippets}
+                  className="btn-secondary text-sm h-[32px] w-[130px] flex items-center justify-center gap-2"
+                  aria-label="Show snippets"
+                >
+                  <svg
+                    className="w-4 h-4 text-cyan-400 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                  <span>Snippets</span>
+                </button>
+                {forceShowSnippetsList && (
+                  <SnippetsPopover
+                    onSelect={onInsertSnippet}
+                    onClose={handleCloseIntellisense}
+                    popoverStyle={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      zIndex: 9999,
+                    }}
+                  />
+                )}
+              </div>
+            )}
+          </div>,
           intellisensePortalRef.current,
         )}
       <pre
