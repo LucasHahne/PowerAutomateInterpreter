@@ -8,7 +8,7 @@ export function VariableValuePanel({ value }: VariableValuePanelProps) {
   return (
     <div className="panel p-5 flex flex-col h-full min-h-0 overflow-hidden">
       <h3 className="section-title mb-3 shrink-0">Formatted variable value</h3>
-      <div className="flex-1 min-h-0 overflow-auto rounded-xl bg-slate-800 border border-slate-700/50 p-4">
+      <div className="flex-1 min-h-0 overflow-auto rounded-xl bg-slate-100 border border-slate-300 dark:bg-slate-800 dark:border-slate-700/50 p-4">
         <pre className="font-mono text-sm whitespace-pre-wrap break-words m-0">
           <HighlightedResult value={value} />
         </pre>

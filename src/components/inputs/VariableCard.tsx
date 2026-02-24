@@ -52,7 +52,7 @@ export function VariableCard({
           onEdit();
         }
       }}
-      className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 hover:border-slate-300 dark:hover:border-slate-600/60 transition-colors cursor-pointer group"
+      className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 hover:border-slate-300 dark:hover:border-slate-600/60 transition-colors cursor-pointer group min-w-[200px] max-w-[320px] w-fit"
     >
       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 overflow-hidden">
         <span className="text-slate-800 dark:text-slate-200 font-medium truncate shrink-0 max-w-[28%] min-w-0 sm:max-w-[100px]">

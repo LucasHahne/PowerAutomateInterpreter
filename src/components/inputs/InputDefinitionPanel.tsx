@@ -36,7 +36,7 @@ export function InputDefinitionPanel({
   };
 
   return (
-    <div className="flex flex-col h-full p-5">
+    <div className="flex flex-col min-h-0 p-5">
       <div className="flex items-center justify-between gap-2 mb-2">
         <h3 className="section-title m-0">Variables</h3>
         <button
@@ -47,7 +47,7 @@ export function InputDefinitionPanel({
           Add
         </button>
       </div>
-      <div className="flex flex-col gap-2 overflow-y-auto flex-1 min-h-0">
+      <div className="flex flex-wrap gap-2 items-start overflow-y-auto max-h-[40vh] min-h-0">
         {Object.entries(entries).length === 0 ? (
           <p className="text-slate-600 dark:text-slate-400 text-sm py-4">
             No variables. Click Add to create one.

@@ -6,6 +6,7 @@ import { ExpressionEditor } from "./components/editor/ExpressionEditor";
 import { RunButton } from "./components/editor/RunButton";
 import { ResultPanel } from "./components/output/ResultPanel";
 import { ErrorDisplay } from "./components/output/ErrorDisplay";
+import { GitHubFeedback } from "./components/output/GitHubFeedback";
 import { FunctionReferencePanel } from "./components/reference/FunctionReferencePanel";
 import { VariableInputPanel } from "./components/reference/VariableInputPanel";
 import { VariableValuePanel } from "./components/reference/VariableValuePanel";
@@ -14,14 +15,36 @@ import { useInterpreter } from "./hooks/useInterpreter";
 
 const NEW_VARIABLE_SENTINEL = "";
 
+const MAX_HISTORY = 15;
+const HISTORY_DISPLAY = 3;
+
+function truncateExpr(s: string, max = 50): string {
+  const t = s.trim();
+  if (t.length <= max) return t;
+  return t.slice(0, max) + "…";
+}
+
 function App() {
-  const { context, setContext, expression, setExpression, output, run } =
+  const { context, setContext, expression, setExpression, output, run, runExpression } =
     useInterpreter();
+  const [expressionHistory, setExpressionHistory] = useState<string[]>([]);
   const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
   const [selectedVariable, setSelectedVariable] = useState<string | null>(null);
   const [variablePreviewValue, setVariablePreviewValue] =
     useState<unknown>(undefined);
   const intellisensePortalRef = useRef<HTMLDivElement>(null);
+
+  const handleRun = useCallback(() => {
+    run();
+    const trimmed = expression.trim();
+    if (trimmed) {
+      setExpressionHistory((prev) => {
+        if (prev[0] === trimmed) return prev;
+        const next = [trimmed, ...prev.filter((e) => e !== trimmed)];
+        return next.slice(0, MAX_HISTORY);
+      });
+    }
+  }, [run, expression]);
 
   const handleVariableClick = useCallback((name: string) => {
     setSelectedVariable(name);
@@ -88,7 +111,10 @@ function App() {
         onParsedValueChange={setVariablePreviewValue}
       />
     ) : selectedFunction ? (
-      <FunctionReferencePanel selectedFunction={selectedFunction} />
+      <FunctionReferencePanel
+        selectedFunction={selectedFunction}
+        onInsertExpression={(expr) => setExpression(expr)}
+      />
     ) : (
       <div className="panel p-4 flex flex-col h-full">
         <h3 className="text-slate-700 dark:text-slate-300 font-medium mb-3">
@@ -106,15 +132,15 @@ function App() {
     <AppShell>
       {/* Desktop: left = 3 stacked sections, middle = reference/variable form, right = variable value (when variable selected). Mobile: single column. */}
       <div
-        className={`h-full min-h-0 grid gap-4 lg:gap-6 grid-rows-1 ${
+        className={`min-h-full grid gap-4 lg:gap-6 grid-rows-1 ${
           showVariableValuePanel
             ? "grid-cols-1 lg:grid-cols-[1fr_minmax(300px,400px)_minmax(280px,360px)]"
             : "grid-cols-1 lg:grid-cols-[1fr_minmax(300px,400px)]"
         }`}
       >
-        {/* Left column: Variables (fixed height), Expression (grows with textarea), Result (fills rest). Column scrolls when needed. */}
-        <div className="flex flex-col gap-4 min-h-0 lg:min-h-full overflow-auto order-1">
-          <div className="panel flex-none flex flex-col min-h-[220px] max-h-[40vh] overflow-hidden p-0">
+        {/* Left column: Variables, Expression, Result. Column and page grow when result is large. */}
+        <div className="flex flex-col gap-4 min-h-0 order-1">
+          <div className="panel flex-none flex flex-col min-h-0 overflow-hidden p-0">
             <InputDefinitionPanel
               context={context}
               onChange={setContext}
@@ -128,24 +154,62 @@ function App() {
               value={expression}
               onChange={setExpression}
               onFunctionClick={handleFunctionClick}
+              onInsertSnippet={(expr) => setExpression(expr)}
+              onRun={handleRun}
               intellisensePortalRef={intellisensePortalRef}
             />
-            <div className="mt-4 flex items-start gap-3">
-              <RunButton onClick={run} />
+            <div className="mt-4 flex items-start gap-3 flex-wrap">
+              <RunButton onClick={handleRun} />
               <div
                 ref={intellisensePortalRef}
                 className="relative min-w-[200px]"
                 aria-hidden
               />
             </div>
+            {expressionHistory.length > 0 && (
+              <div className="mt-3">
+                <p className="text-slate-600 dark:text-slate-400 text-xs font-medium uppercase tracking-wider mb-2">
+                  Recent
+                </p>
+                <ul className="space-y-1.5 max-h-[120px] overflow-y-auto">
+                  {expressionHistory.slice(0, HISTORY_DISPLAY).map((expr) => (
+                    <li
+                      key={expr}
+                      className="flex items-center gap-2 text-sm min-w-0"
+                    >
+                      <code className="flex-1 min-w-0 truncate text-slate-600 dark:text-slate-400 font-mono text-xs">
+                        {truncateExpr(expr)}
+                      </code>
+                      <div className="flex gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setExpression(expr)}
+                          className="btn-secondary text-xs py-1 px-2"
+                        >
+                          Use
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => runExpression(expr)}
+                          className="btn-primary text-xs py-1 px-2"
+                        >
+                          Run
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {output && !output.success && (
               <div className="mt-3">
                 <ErrorDisplay error={output.error} kind={output.kind} />
               </div>
             )}
           </div>
-          <div className="panel flex-1 flex flex-col min-h-0 overflow-hidden p-5 relative z-0">
+          <div className="panel flex-1 flex flex-col min-h-0 p-5 relative z-0">
             <ResultPanel result={output?.success ? output.value : null} />
+            <GitHubFeedback />
           </div>
         </div>
         {/* Middle column: Function reference or variable input. Subtle cyan border + shadow when add variable is selected. */}

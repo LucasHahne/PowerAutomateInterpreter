@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useTheme } from "../../context/ThemeContext";
 
-const APP_VERSION = "1.1.0.0";
+const APP_VERSION = "1.2.0.0";
 
 interface AppShellProps {
   children: ReactNode;
@@ -76,7 +76,7 @@ export function AppShell({ children }: AppShellProps) {
         </div>
       </header>
       <main className="flex-1 min-h-0 w-full overflow-auto">
-        <div className="h-full w-full px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+        <div className="min-h-full w-full px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
           {children}
         </div>
       </main>

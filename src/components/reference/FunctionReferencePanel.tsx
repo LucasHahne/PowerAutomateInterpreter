@@ -2,10 +2,13 @@ import { getFunctionMetadata } from "../../interpreter/functions/metadata";
 
 interface FunctionReferencePanelProps {
   selectedFunction: string | null;
+  /** Called when user clicks "Try" on an example to insert it into the editor */
+  onInsertExpression?: (expression: string) => void;
 }
 
 export function FunctionReferencePanel({
   selectedFunction,
+  onInsertExpression,
 }: FunctionReferencePanelProps) {
   const metadata = selectedFunction
     ? getFunctionMetadata(selectedFunction)
@@ -109,9 +112,20 @@ export function FunctionReferencePanel({
                 key={i}
                 className="bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700/50 overflow-hidden"
               >
-                <code className="block text-emerald-600 dark:text-emerald-400 font-mono text-sm px-3 py-2 whitespace-pre-wrap break-all">
-                  {ex.expression}
-                </code>
+                <div className="flex items-start justify-between gap-2 px-3 py-2">
+                  <code className="flex-1 min-w-0 text-emerald-600 dark:text-emerald-400 font-mono text-sm whitespace-pre-wrap break-all">
+                    {ex.expression}
+                  </code>
+                  {onInsertExpression && (
+                    <button
+                      type="button"
+                      onClick={() => onInsertExpression(ex.expression)}
+                      className="btn-secondary text-xs shrink-0 py-1.5 px-2"
+                    >
+                      Try
+                    </button>
+                  )}
+                </div>
                 <div className="px-3 py-2 border-t border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 text-sm">
                   <span className="text-slate-500 text-xs">→ </span>
                   <code className="text-amber-600 dark:text-amber-300/90">
