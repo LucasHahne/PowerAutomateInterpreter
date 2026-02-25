@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useTheme } from "../../context/ThemeContext";
 
-const APP_VERSION = "1.2.1.0";
+const APP_VERSION = "1.2.3.0";
 
 interface AppShellProps {
   children: ReactNode;
@@ -11,8 +11,14 @@ export function AppShell({ children }: AppShellProps) {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="min-h-screen flex flex-col text-slate-900 dark:text-slate-100 font-sans">
-      <header className="shrink-0 border-b border-slate-200 dark:border-slate-700/40 bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl">
+    <div
+      id="app"
+      className="min-h-screen flex flex-col text-slate-900 dark:text-slate-100 font-sans"
+    >
+      <header
+        id="app-header"
+        className="shrink-0 border-b border-slate-200 dark:border-slate-700/40 bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl"
+      >
         <div className="w-full px-4 sm:px-6 lg:px-8 py-4 lg:py-5 flex items-start justify-between gap-4">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-baseline gap-2 flex-wrap">
@@ -34,6 +40,7 @@ export function AppShell({ children }: AppShellProps) {
             </p>
           </div>
           <button
+            id="theme-toggle"
             type="button"
             onClick={toggleTheme}
             aria-label={
@@ -75,7 +82,7 @@ export function AppShell({ children }: AppShellProps) {
           </button>
         </div>
       </header>
-      <main className="flex-auto min-h-0 w-full">
+      <main id="main-content" className="flex-auto min-h-0 w-full">
         <div className="min-h-full w-full px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
           {children}
         </div>

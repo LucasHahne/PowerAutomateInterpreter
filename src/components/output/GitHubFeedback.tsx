@@ -60,6 +60,7 @@ const featureUrl = buildIssueUrl(FEATURE_REQUEST_TITLE, FEATURE_REQUEST_BODY);
 export function GitHubFeedback() {
   return (
     <section
+      id="feedback-section"
       className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50 flex flex-wrap items-center gap-2"
       aria-label="Feedback and support"
     >

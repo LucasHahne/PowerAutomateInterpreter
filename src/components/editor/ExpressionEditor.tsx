@@ -73,6 +73,7 @@ export function ExpressionEditor({
   const [forceShowFunctionList, setForceShowFunctionList] = useState(false);
   const [forceShowSnippetsList, setForceShowSnippetsList] = useState(false);
   const [, setPortalMounted] = useState(false);
+  const justInsertedSnippetRef = useRef(false);
 
   useEffect(() => {
     if (!intellisensePortalRef) return;
@@ -121,6 +122,11 @@ export function ExpressionEditor({
   );
 
   useEffect(() => {
+    if (justInsertedSnippetRef.current) {
+      justInsertedSnippetRef.current = false;
+      setIntellisenseDismissed(true);
+      return;
+    }
     if (!forceShowFunctionList) setIntellisenseDismissed(false);
   }, [value, cursor.start, forceShowFunctionList]);
 
@@ -344,6 +350,7 @@ export function ExpressionEditor({
   return (
     <div className="relative">
       <textarea
+        id="expression-input"
         ref={textareaRef}
         value={value}
         onChange={(e) => {
@@ -436,7 +443,10 @@ export function ExpressionEditor({
                 </button>
                 {forceShowSnippetsList && (
                   <SnippetsPopover
-                    onSelect={onInsertSnippet}
+                    onSelect={(expr) => {
+                      justInsertedSnippetRef.current = true;
+                      onInsertSnippet(expr);
+                    }}
                     onClose={handleCloseIntellisense}
                     popoverStyle={{
                       position: "absolute",

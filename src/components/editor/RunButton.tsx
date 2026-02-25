@@ -6,6 +6,7 @@ interface RunButtonProps {
 export function RunButton({ onClick, disabled }: RunButtonProps) {
   return (
     <button
+      id="run-button"
       type="button"
       onClick={onClick}
       disabled={disabled}

@@ -25,7 +25,7 @@ export function ResultPanel({ result }: ResultPanelProps) {
   }, [result]);
 
   return (
-    <div className="flex flex-col min-h-0">
+    <div id="result-content" className="flex flex-col min-h-0">
       <div className="flex items-center justify-between gap-2 mb-3">
         <h3 className="section-title m-0">Result</h3>
         {result !== null && (
@@ -44,7 +44,7 @@ export function ResultPanel({ result }: ResultPanelProps) {
           Run an expression to see the result.
         </p>
       ) : (
-        <pre className="font-mono text-sm overflow-auto whitespace-pre-wrap break-words rounded-xl p-4 bg-slate-100 border border-slate-300 dark:bg-slate-800 dark:border-slate-700/50 flex-1 min-h-0">
+        <pre id="result-output" className="font-mono text-sm overflow-auto whitespace-pre-wrap break-words rounded-xl p-4 bg-slate-100 border border-slate-300 dark:bg-slate-800 dark:border-slate-700/50 flex-1 min-h-0">
           <HighlightedResult value={result} />
         </pre>
       )}
