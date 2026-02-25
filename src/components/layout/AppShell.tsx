@@ -11,7 +11,7 @@ export function AppShell({ children }: AppShellProps) {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="h-screen min-h-screen flex flex-col text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
+    <div className="min-h-screen flex flex-col text-slate-900 dark:text-slate-100 font-sans">
       <header className="shrink-0 border-b border-slate-200 dark:border-slate-700/40 bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl">
         <div className="w-full px-4 sm:px-6 lg:px-8 py-4 lg:py-5 flex items-start justify-between gap-4">
           <div>
@@ -75,7 +75,7 @@ export function AppShell({ children }: AppShellProps) {
           </button>
         </div>
       </header>
-      <main className="flex-1 min-h-0 w-full overflow-auto">
+      <main className="flex-auto min-h-0 w-full">
         <div className="min-h-full w-full px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
           {children}
         </div>

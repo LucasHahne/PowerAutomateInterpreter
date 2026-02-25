@@ -281,19 +281,19 @@ export function ExpressionEditor({
   }, []);
 
   const handleCloseIntellisense = useCallback(() => {
-    // #region agent log
-    fetch("http://127.0.0.1:7243/ingest/1f982de4-7c53-4b23-aef2-1db901e4f1b1", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "56d1b9" },
-      body: JSON.stringify({
-        sessionId: "56d1b9",
-        location: "ExpressionEditor.tsx:handleCloseIntellisense",
-        message: "handleCloseIntellisense called",
-        data: { hypothesisId: "H2" },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
+    if (import.meta.env.DEV) {
+      fetch("http://127.0.0.1:7243/ingest/1f982de4-7c53-4b23-aef2-1db901e4f1b1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "56d1b9" },
+        body: JSON.stringify({
+          sessionId: "56d1b9",
+          location: "ExpressionEditor.tsx:handleCloseIntellisense",
+          message: "handleCloseIntellisense called",
+          data: { hypothesisId: "H2" },
+          timestamp: Date.now(),
+        }),
+      }).catch(() => {});
+    }
     setIntellisenseDismissed(true);
     setForceShowFunctionList(false);
     setForceShowSnippetsList(false);
