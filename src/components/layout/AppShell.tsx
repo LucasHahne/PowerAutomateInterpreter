@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useTheme } from "../../context/ThemeContext";
 
-const APP_VERSION = "1.2.3.0";
+const APP_VERSION = "1.2.4.0";
 
 interface AppShellProps {
   children: ReactNode;
@@ -36,7 +36,7 @@ export function AppShell({ children }: AppShellProps) {
               </span>
             </h1>
             <p className="text-slate-600 dark:text-slate-400 text-sm mt-1.5">
-              Define variables, then evaluate expressions
+              Test your expressions for Power Automate
             </p>
           </div>
           <button
