@@ -50,7 +50,7 @@ export function InputDefinitionPanel({
       <div className="flex flex-wrap gap-2 items-start overflow-y-auto max-h-[40vh] min-h-0">
         {Object.entries(entries).length === 0 ? (
           <p className="text-slate-600 dark:text-slate-400 text-sm py-4">
-            No variables. Click Add to create one.
+            No variables. Click 'Add' to create one.
           </p>
         ) : (
           Object.entries(entries).map(([name, { type, value }]) => (
