@@ -1,5 +1,7 @@
 # Power Automate Expression Interpreter
 
+> **In-browser tool:** write, run, and debug Power Automate / Logic Apps expressions with variables, intellisense, and function docs—no Power Platform sign-in.
+
 A web-based interpreter for **Power Automate** (and Azure Logic Apps) expression language. Define variables, write expressions using built-in functions, and evaluate them in the browser—no cloud or Power Platform account required.
 
 ![PA Expression Interpreter](https://img.shields.io/badge/Power%20Automate-Expression%20Interpreter-6264A7?style=flat-square)
@@ -29,35 +31,6 @@ The interpreter supports a subset of the [Workflow Definition Language functions
 | **Conversion** | `string`, `int`, `float`, `bool`, `json`, `base64`, …                                |
 | **DateTime**   | `utcNow`, `formatDateTime`, `addDays`, `startOfDay`, …                               |
 | **Workflow**   | `parameters`, `variables`, `body`, `triggerBody`, …                                  |
-
-## Project structure
-
-```
-src/
-├── main.tsx                 # App entry
-├── App.tsx                  # Main layout, state, and grid (variables / expression / result | reference | variable value)
-├── hooks/
-│   └── useInterpreter.ts    # Interpreter state and run
-├── interpreter/             # Expression engine
-│   ├── index.ts             # interpret(expression, context)
-│   ├── context.ts           # Variables/parameters types and helpers
-│   ├── parser/              # Tokenizer + parser → AST
-│   ├── evaluator.ts         # AST → value
-│   ├── validator.ts         # Arity validation
-│   └── functions/           # Built-in functions + metadata
-├── components/
-│   ├── layout/              # AppShell (header, theme toggle, main content)
-│   ├── inputs/              # Variable definition panel, variable cards
-│   ├── editor/              # Expression editor, Run button, Functions/Snippets dropdowns, intellisense
-│   ├── output/              # Result panel, error display, GitHub feedback
-│   └── reference/           # Function reference panel, variable add/edit form, formatted variable value
-├── editor/
-│   └── intellisenseContext.ts
-├── constants/
-│   └── snippets.ts         # Snippet definitions (alphabetically sorted for UI)
-└── styles/
-    └── theme.css
-```
 
 ## License
 
