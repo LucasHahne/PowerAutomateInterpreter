@@ -102,6 +102,17 @@ export function GitHubFeedback() {
         </svg>
         Suggest a feature
       </a>
+      <span className="text-slate-300 dark:text-slate-600" aria-hidden>
+        ·
+      </span>
+      <a
+        href="https://jsontoexpression.workappholics.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center text-sm font-medium text-slate-900 dark:text-slate-300 rounded-lg border border-current bg-current/5 transition-all duration-200 ease-out hover:bg-cyan-500/15 hover:border-cyan-500/45 hover:shadow-[0_0_12px_-2px_rgba(6,182,212,0.45)] dark:hover:bg-cyan-400/12 dark:hover:border-cyan-400/40 dark:hover:shadow-[0_0_14px_-2px_rgba(34,211,238,0.35)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 px-2.5 py-1"
+      >
+        Get expressions of your json here
+      </a>
     </section>
   );
 }
