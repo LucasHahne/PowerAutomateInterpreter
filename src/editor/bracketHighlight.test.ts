@@ -41,6 +41,23 @@ describe("computeBracketDepthClasses", () => {
     expect(classes[innerClose]).toBe("bracket-depth-1");
   });
 
+  it("assigns bracket-depth-3 for fourth nesting level of parens", () => {
+    const tokens = new Tokenizer("((((a))))").tokenize().filter((t) => t.type !== "eof");
+    const classes = computeBracketDepthClasses(tokens);
+    const parenI = tokens
+      .map((t, i) => (t.type === "lparen" || t.type === "rparen" ? i : -1))
+      .filter((i) => i >= 0);
+    expect(parenI).toHaveLength(8);
+    expect(classes[parenI[0]]).toBe("bracket-depth-0");
+    expect(classes[parenI[1]]).toBe("bracket-depth-1");
+    expect(classes[parenI[2]]).toBe("bracket-depth-2");
+    expect(classes[parenI[3]]).toBe("bracket-depth-3");
+    expect(classes[parenI[4]]).toBe("bracket-depth-3");
+    expect(classes[parenI[5]]).toBe("bracket-depth-2");
+    expect(classes[parenI[6]]).toBe("bracket-depth-1");
+    expect(classes[parenI[7]]).toBe("bracket-depth-0");
+  });
+
   it("handles (a[b]) nesting", () => {
     const tokens = new Tokenizer("(a[b])").tokenize().filter((t) => t.type !== "eof");
     const classes = computeBracketDepthClasses(tokens);

@@ -3,7 +3,7 @@ import type { Token, TokenType } from "../interpreter/parser/tokenizer";
 /** Number of distinct bracket depth colors (cycle length). */
 export const BRACKET_DEPTH_COUNT = 6;
 
-/** CSS class for a given nesting depth; matches `HighlightedResult` palette via `theme.css`. */
+/** CSS class for a given nesting depth; colors are defined in `index.css` (plain CSS, not Tailwind @apply). */
 export function bracketDepthClassName(depth: number): string {
   const d = ((depth % BRACKET_DEPTH_COUNT) + BRACKET_DEPTH_COUNT) % BRACKET_DEPTH_COUNT;
   return `bracket-depth-${d}`;
