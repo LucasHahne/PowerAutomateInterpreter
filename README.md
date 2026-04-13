@@ -4,7 +4,7 @@
 
 A web-based interpreter for **Power Automate** (and Azure Logic Apps) expression language. Define variables, write expressions using built-in functions, and evaluate them in the browser—no cloud or Power Platform account required.
 
-![PA Expression Interpreter](https://img.shields.io/badge/Power%20Automate-Expression%20Interpreter-6264A7?style=flat-square)
+![PA Expression Interpreter](https://img.shields.io/badge/Power_Automate_Expression_Interpreter-v1.2.5.0-0078D4?style=flat-square)
 
 ## Features
 
