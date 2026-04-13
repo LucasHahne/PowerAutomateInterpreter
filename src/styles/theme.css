@@ -80,24 +80,4 @@
   .token-punctuation {
     @apply text-slate-500;
   }
-
-  /* Rainbow bracket depth (expression editor + result tree); matches former HighlightedResult palette */
-  .bracket-depth-0 {
-    @apply text-orange-400;
-  }
-  .bracket-depth-1 {
-    @apply text-purple-400;
-  }
-  .bracket-depth-2 {
-    @apply text-red-400;
-  }
-  .bracket-depth-3 {
-    @apply text-emerald-400;
-  }
-  .bracket-depth-4 {
-    @apply text-pink-400;
-  }
-  .bracket-depth-5 {
-    @apply text-sky-400;
-  }
 }

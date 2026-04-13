@@ -10,7 +10,7 @@ import { getIntellisenseContext } from "../../editor/intellisenseContext";
 import type { IntellisenseContext } from "../../editor/intellisenseContext";
 import { IntellisenseDropdown, filterFunctions } from "./IntellisenseDropdown";
 import { SnippetsPopover } from "./ExpressionSnippets";
-import { computeBracketDepthClasses } from "../../editor/bracketHighlight";
+import { computeBracketDepthColors } from "../../editor/bracketHighlight";
 
 interface ExpressionEditorProps {
   value: string;
@@ -205,8 +205,8 @@ export function ExpressionEditor({
     // Tokenization failed (incomplete/invalid expression) - no highlighting
   }
 
-  const bracketClasses =
-    tokens.length > 0 ? computeBracketDepthClasses(tokens) : [];
+  const bracketColors =
+    tokens.length > 0 ? computeBracketDepthColors(tokens) : [];
 
   const highlightedContent: React.ReactNode[] = [];
   let pos = 0;
@@ -218,22 +218,29 @@ export function ExpressionEditor({
       );
     }
     const text = value.slice(token.start, token.end);
-    const bracketClass = bracketClasses[index];
-    const className =
-      bracketClass ??
-      getTokenClassName(token, tokens, index, knownFunctions, !!onFunctionClick);
+    const bracketColor = bracketColors[index];
+    const className = getTokenClassName(
+      token,
+      tokens,
+      index,
+      knownFunctions,
+      !!onFunctionClick,
+    );
     const isClickable =
       className.includes("clickable") && typeof token.value === "string";
+
+    const style: React.CSSProperties | undefined = (() => {
+      const s: React.CSSProperties = {};
+      if (bracketColor) s.color = bracketColor;
+      if (isClickable && onFunctionClick) s.pointerEvents = "auto";
+      return Object.keys(s).length > 0 ? s : undefined;
+    })();
 
     highlightedContent.push(
       <span
         key={`tok-${token.start}`}
         className={className}
-        style={
-          isClickable && onFunctionClick
-            ? { pointerEvents: "auto" as const }
-            : undefined
-        }
+        style={style}
         {...(isClickable && onFunctionClick
           ? {
               onClick: (e: React.MouseEvent) => {
