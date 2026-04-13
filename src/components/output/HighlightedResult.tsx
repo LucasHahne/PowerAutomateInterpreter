@@ -1,18 +1,5 @@
 import type { ReactNode } from 'react';
-
-/** Bracket colors by depth so opening/closing pairs match */
-const BRACKET_CLASSES = [
-  'text-cyan-400',   // depth 0
-  'text-purple-400', // depth 1
-  'text-amber-400',  // depth 2
-  'text-emerald-400',// depth 3
-  'text-pink-400',   // depth 4
-  'text-sky-400',    // depth 5
-];
-
-function bracketClass(depth: number): string {
-  return BRACKET_CLASSES[depth % BRACKET_CLASSES.length];
-}
+import { bracketDepthClassName } from '../../editor/bracketHighlight';
 
 function span(cls: string, children: ReactNode) {
   return <span className={cls}>{children}</span>;
@@ -46,7 +33,7 @@ export function HighlightedResult({ value, depth = 0, indent = 0 }: HighlightedR
     return <span className="text-emerald-400">{escaped}</span>;
   }
   if (Array.isArray(value)) {
-    const bc = bracketClass(d);
+    const bc = bracketDepthClassName(d);
     if (value.length === 0) {
       return (
         <>
@@ -74,7 +61,7 @@ export function HighlightedResult({ value, depth = 0, indent = 0 }: HighlightedR
   }
   if (typeof value === 'object' && value !== null) {
     const entries = Object.entries(value);
-    const bc = bracketClass(d);
+    const bc = bracketDepthClassName(d);
     if (entries.length === 0) {
       return (
         <>

@@ -10,6 +10,7 @@ import { getIntellisenseContext } from "../../editor/intellisenseContext";
 import type { IntellisenseContext } from "../../editor/intellisenseContext";
 import { IntellisenseDropdown, filterFunctions } from "./IntellisenseDropdown";
 import { SnippetsPopover } from "./ExpressionSnippets";
+import { computeBracketDepthClasses } from "../../editor/bracketHighlight";
 
 interface ExpressionEditorProps {
   value: string;
@@ -37,6 +38,8 @@ function getTokenClassName(
   if (
     token.type === "lparen" ||
     token.type === "rparen" ||
+    token.type === "lbracket" ||
+    token.type === "rbracket" ||
     token.type === "comma" ||
     token.type === "at"
   ) {
@@ -202,6 +205,9 @@ export function ExpressionEditor({
     // Tokenization failed (incomplete/invalid expression) - no highlighting
   }
 
+  const bracketClasses =
+    tokens.length > 0 ? computeBracketDepthClasses(tokens) : [];
+
   const highlightedContent: React.ReactNode[] = [];
   let pos = 0;
 
@@ -212,13 +218,10 @@ export function ExpressionEditor({
       );
     }
     const text = value.slice(token.start, token.end);
-    const className = getTokenClassName(
-      token,
-      tokens,
-      index,
-      knownFunctions,
-      !!onFunctionClick,
-    );
+    const bracketClass = bracketClasses[index];
+    const className =
+      bracketClass ??
+      getTokenClassName(token, tokens, index, knownFunctions, !!onFunctionClick);
     const isClickable =
       className.includes("clickable") && typeof token.value === "string";
 
