@@ -1,17 +1,25 @@
 import type { Token, TokenType } from "../interpreter/parser/tokenizer";
 
-/** Number of distinct bracket depth colors (cycle length). */
-export const BRACKET_DEPTH_COUNT = 6;
+/**
+ * Bracket colors by nesting depth (depth 0 = outermost; cycles after the last entry).
+ * Edit these `rgb(...)` strings — used for expression editor parens/brackets and result JSON braces.
+ */
+export const BRACKET_DEPTH_RGB = [
+  "rgb(101, 255, 74)",
+  "rgb(255, 193, 40)",
+  "rgb(40, 237, 255)",
+  "rgb(243, 40, 255)",
+  "rgb(249, 255, 40)",
+  "rgb(255, 87, 40)",
+] as const;
 
-/** CSS class for a given nesting depth; colors are defined in `index.css` (plain CSS, not Tailwind @apply). */
-export function bracketDepthClassName(depth: number): string {
-  const d = ((depth % BRACKET_DEPTH_COUNT) + BRACKET_DEPTH_COUNT) % BRACKET_DEPTH_COUNT;
-  return `bracket-depth-${d}`;
+export const BRACKET_DEPTH_COUNT = BRACKET_DEPTH_RGB.length;
+
+export function bracketDepthRgb(depth: number): string {
+  const d =
+    ((depth % BRACKET_DEPTH_COUNT) + BRACKET_DEPTH_COUNT) % BRACKET_DEPTH_COUNT;
+  return BRACKET_DEPTH_RGB[d];
 }
-
-export const BRACKET_DEPTH_CLASS_NAMES = Array.from({ length: BRACKET_DEPTH_COUNT }, (_, i) =>
-  bracketDepthClassName(i),
-);
 
 type BracketKind = "paren" | "square";
 
@@ -23,15 +31,15 @@ function openerKind(type: TokenType): BracketKind | null {
 
 function closerMatches(kind: BracketKind, type: TokenType): boolean {
   return (
-    (kind === "paren" && type === "rparen") || (kind === "square" && type === "rbracket")
+    (kind === "paren" && type === "rparen") ||
+    (kind === "square" && type === "rbracket")
   );
 }
 
 /**
- * Rainbow-style class per token index for `(` `)` `[` `]`. Unmatched closers yield `null`
- * (fall back to generic punctuation). Openers always get a class; unclosed opens are still colored.
+ * RGB color per token index for `(` `)` `[` `]`, or `null` when not a matched bracket token.
  */
-export function computeBracketDepthClasses(tokens: Token[]): (string | null)[] {
+export function computeBracketDepthColors(tokens: Token[]): (string | null)[] {
   const result: (string | null)[] = tokens.map(() => null);
   const stack: { depth: number; kind: BracketKind }[] = [];
 
@@ -41,7 +49,7 @@ export function computeBracketDepthClasses(tokens: Token[]): (string | null)[] {
     if (open) {
       const depth = stack.length;
       stack.push({ depth, kind: open });
-      result[i] = bracketDepthClassName(depth);
+      result[i] = bracketDepthRgb(depth);
       continue;
     }
     if (t.type === "rparen" || t.type === "rbracket") {
@@ -51,7 +59,7 @@ export function computeBracketDepthClasses(tokens: Token[]): (string | null)[] {
         continue;
       }
       stack.pop();
-      result[i] = bracketDepthClassName(top.depth);
+      result[i] = bracketDepthRgb(top.depth);
     }
   }
 

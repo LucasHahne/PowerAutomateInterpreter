@@ -1,8 +1,13 @@
-import type { ReactNode } from "react";
-import { bracketDepthClassName } from "../../editor/bracketHighlight";
+import type { CSSProperties, ReactNode } from "react";
+import { bracketDepthRgb } from "../../editor/bracketHighlight";
 
 function span(cls: string, children: ReactNode) {
   return <span className={cls}>{children}</span>;
+}
+
+function spanRgb(rgb: string, children: ReactNode) {
+  const style: CSSProperties = { color: rgb };
+  return <span style={style}>{children}</span>;
 }
 
 interface HighlightedResultProps {
@@ -33,18 +38,18 @@ export function HighlightedResult({ value, depth = 0, indent = 0 }: HighlightedR
     return <span className="text-emerald-400">{escaped}</span>;
   }
   if (Array.isArray(value)) {
-    const bc = bracketDepthClassName(d);
+    const rgb = bracketDepthRgb(d);
     if (value.length === 0) {
       return (
         <>
-          {span(bc, "[")}
-          {span(bc, "]")}
+          {spanRgb(rgb, "[")}
+          {spanRgb(rgb, "]")}
         </>
       );
     }
     return (
       <>
-        {span(bc, "[")}
+        {spanRgb(rgb, "[")}
         <br />
         {value.map((item, i) => (
           <span key={i}>
@@ -55,24 +60,24 @@ export function HighlightedResult({ value, depth = 0, indent = 0 }: HighlightedR
           </span>
         ))}
         {idt}
-        {span(bc, "]")}
+        {spanRgb(rgb, "]")}
       </>
     );
   }
   if (typeof value === "object" && value !== null) {
     const entries = Object.entries(value);
-    const bc = bracketDepthClassName(d);
+    const rgb = bracketDepthRgb(d);
     if (entries.length === 0) {
       return (
         <>
-          {span(bc, "{")}
-          {span(bc, "}")}
+          {spanRgb(rgb, "{")}
+          {spanRgb(rgb, "}")}
         </>
       );
     }
     return (
       <>
-        {span(bc, "{")}
+        {spanRgb(rgb, "{")}
         <br />
         {entries.map(([key, val], i) => (
           <span key={key}>
@@ -85,7 +90,7 @@ export function HighlightedResult({ value, depth = 0, indent = 0 }: HighlightedR
           </span>
         ))}
         {idt}
-        {span(bc, "}")}
+        {spanRgb(rgb, "}")}
       </>
     );
   }
