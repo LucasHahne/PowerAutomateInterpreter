@@ -7,7 +7,7 @@ import type { Token, TokenType } from "../interpreter/parser/tokenizer";
 export const BRACKET_DEPTH_RGB = [
   "rgb(101, 255, 74)",
   "rgb(255, 193, 40)",
-  "rgb(40, 237, 255)",
+  "rgb(255, 79, 141)",
   "rgb(243, 40, 255)",
   "rgb(249, 255, 40)",
   "rgb(255, 87, 40)",
