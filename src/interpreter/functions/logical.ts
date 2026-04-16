@@ -4,17 +4,17 @@ export const logicalFunctions: Record<string, (args: unknown[], ctx: EvaluationC
   and: (args) => {
     /* c8 ignore next */
     if (args.length < 2) throw new TypeError('and expects at least 2 arguments');
-    return args.every((a) => Boolean(a));
+    return args.every((a) => !!a);
   },
   or: (args) => {
     /* c8 ignore next */
     if (args.length < 2) throw new TypeError('or expects at least 2 arguments');
-    return args.some((a) => Boolean(a));
+    return args.some((a) => !!a);
   },
   not: (args) => {
     /* c8 ignore next */
     if (args.length !== 1) throw new TypeError('not expects 1 argument');
-    return !Boolean(args[0]);
+    return !args[0];
   },
   equals: (args) => {
     /* c8 ignore next */
@@ -27,7 +27,7 @@ export const logicalFunctions: Record<string, (args: unknown[], ctx: EvaluationC
   if: (args) => {
     /* c8 ignore next */
     if (args.length !== 3) throw new TypeError('if expects 3 arguments');
-    return Boolean(args[0]) ? args[1] : args[2];
+    return args[0] ? args[1] : args[2];
   },
   greater: (args) => {
     /* c8 ignore next */

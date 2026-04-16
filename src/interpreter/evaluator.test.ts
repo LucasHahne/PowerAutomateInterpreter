@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { evaluate, EvaluationError } from './evaluator';
 import { parseExpression } from './parser/parser';
 import { createContext } from '../test/testHelpers';

@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { Tokenizer } from './tokenizer';
 
 function tokenTypes(tokens: ReturnType<Tokenizer['tokenize']>) {

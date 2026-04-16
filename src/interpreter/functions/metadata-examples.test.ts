@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { FUNCTION_METADATA } from './metadata';
 import { interpret } from '../index';
 import { createContext } from '../../test/testHelpers';

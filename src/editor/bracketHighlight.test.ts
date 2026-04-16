@@ -1,4 +1,3 @@
-import { describe, it, expect } from "vitest";
 import { Tokenizer } from "../interpreter/parser/tokenizer";
 import {
   BRACKET_DEPTH_COUNT,

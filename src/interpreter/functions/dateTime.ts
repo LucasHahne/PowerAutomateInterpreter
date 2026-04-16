@@ -24,7 +24,7 @@ function formatDate(d: Date, fmt?: string): string {
 }
 
 export const dateTimeFunctions: Record<string, (args: unknown[], ctx: EvaluationContext) => unknown> = {
-  utcNow: (args, _ctx) => {
+  utcNow: (args) => {
     const fmt = args.length >= 1 ? String(args[0]) : undefined;
     return formatDate(new Date(), fmt || 'o');
   },
@@ -231,7 +231,7 @@ export const dateTimeFunctions: Record<string, (args: unknown[], ctx: Evaluation
           else if (/^m+$/.test(p)) map.m = i++;
           else if (/^s+$/.test(p)) map.s = i++;
         }
-        const tokens = s.split(/[\/\-\s:,.T]+/);
+        const tokens = s.split(/[/\s:,.T-]+/);
         const d = new Date(2000, 0, 1, 0, 0, 0, 0);
         for (const [key, idx] of Object.entries(map)) {
           const v = parseInt(tokens[idx] || '0', 10);
@@ -258,7 +258,7 @@ export const dateTimeFunctions: Record<string, (args: unknown[], ctx: Evaluation
       });
       const parts = formatter.formatToParts(new Date(2000, 0, 1));
       const order = parts.map((p) => String(p.type)).filter((t) => ['day', 'month', 'year'].includes(t));
-      const sep = /[\/\-\.\s]+/;
+      const sep = /[/.\s-]+/;
       const tokens = s.split(sep);
       if (tokens.length >= 3) {
         const getIdx = (t: string) => order.indexOf(t);

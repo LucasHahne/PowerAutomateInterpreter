@@ -2,7 +2,7 @@ import type { InputType } from "../../interpreter/context";
 
 const MAX_PREVIEW_LENGTH = 64;
 
-function formatValuePreview(value: unknown, _type: InputType): string {
+function formatValuePreview(value: unknown): string {
   if (value === null) return "null";
   if (value === undefined) return "undefined";
   if (typeof value === "boolean") return String(value);
@@ -39,7 +39,7 @@ export function VariableCard({
   onEdit,
   onRemove,
 }: VariableCardProps) {
-  const preview = formatValuePreview(value, type);
+  const preview = formatValuePreview(value);
 
   return (
     <div

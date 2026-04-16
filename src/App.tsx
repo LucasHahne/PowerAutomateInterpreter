@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 import type { InputType } from "./interpreter/context";
 import { AppShell } from "./components/layout/AppShell";
 import { InputDefinitionPanel } from "./components/inputs/InputDefinitionPanel";
@@ -8,9 +8,12 @@ import { ResultPanel } from "./components/output/ResultPanel";
 import { ErrorDisplay } from "./components/output/ErrorDisplay";
 import { GitHubFeedback } from "./components/output/GitHubFeedback";
 import { FunctionReferencePanel } from "./components/reference/FunctionReferencePanel";
-import { VariableInputPanel } from "./components/reference/VariableInputPanel";
+import { VariableInputPanel } from "./components/inputs/VariableInputPanel";
 import { VariableValuePanel } from "./components/reference/VariableValuePanel";
 import { parseValue } from "./components/inputs/variableFormUtils";
+import { TestCasesPanel } from "./components/testing/TestCasesPanel";
+import type { TestCase, TestRunResult } from "./testing/testCases";
+import { runTestCases } from "./interpreter";
 import { useInterpreter } from "./hooks/useInterpreter";
 
 const NEW_VARIABLE_SENTINEL = "";
@@ -24,14 +27,25 @@ function truncateExpr(s: string, max = 50): string {
 }
 
 function App() {
-  const { context, setContext, expression, setExpression, output, run, runExpression } =
-    useInterpreter();
+  const {
+    context,
+    setContext,
+    expression,
+    setExpression,
+    output,
+    trace,
+    run,
+    runExpression,
+  } = useInterpreter();
   const [expressionHistory, setExpressionHistory] = useState<string[]>([]);
   const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
   const [selectedVariable, setSelectedVariable] = useState<string | null>(null);
   const [variablePreviewValue, setVariablePreviewValue] =
     useState<unknown>(undefined);
-  const intellisensePortalRef = useRef<HTMLDivElement>(null);
+  const [testCases, setTestCases] = useState<TestCase[]>([]);
+  const [testResults, setTestResults] = useState<TestRunResult[] | null>(null);
+  const [intellisensePortalEl, setIntellisensePortalEl] =
+    useState<HTMLDivElement | null>(null);
 
   const handleRun = useCallback(() => {
     run();
@@ -44,6 +58,11 @@ function App() {
       });
     }
   }, [run, expression]);
+
+  const handleRunAllCases = useCallback(() => {
+    const results = runTestCases(expression, context, testCases);
+    setTestResults(results);
+  }, [expression, context, testCases]);
 
   const handleVariableClick = useCallback((name: string) => {
     setSelectedVariable(name);
@@ -102,6 +121,7 @@ function App() {
   const referencePanelContent =
     selectedVariable !== null ? (
       <VariableInputPanel
+        key={selectedVariable}
         selectedVariable={selectedVariable}
         context={context}
         onSave={handleSaveVariable}
@@ -115,7 +135,10 @@ function App() {
         onInsertExpression={(expr) => setExpression(expr)}
       />
     ) : (
-      <div id="reference-placeholder" className="panel p-4 flex flex-col h-full">
+      <div
+        id="reference-placeholder"
+        className="panel p-4 flex flex-col h-full"
+      >
         <h3 className="text-slate-700 dark:text-slate-300 font-medium mb-3">
           Reference
         </h3>
@@ -140,7 +163,10 @@ function App() {
       >
         {/* Left column: Variables, Expression, Result. Column and page grow when result is large. */}
         <div id="editor-column" className="flex flex-col gap-4 min-h-0 order-1">
-          <div id="variables-panel" className="panel flex-none flex flex-col min-h-0 overflow-hidden p-0">
+          <div
+            id="variables-panel"
+            className="panel flex-none flex flex-col min-h-0 overflow-hidden p-0"
+          >
             <InputDefinitionPanel
               context={context}
               onChange={setContext}
@@ -148,20 +174,24 @@ function App() {
               onAddVariable={handleAddVariable}
             />
           </div>
-          <div id="expression-section" className="panel flex-none flex flex-col min-h-[120px] overflow-visible p-5 relative z-10">
+          <div
+            id="expression-section"
+            className="panel flex-none flex flex-col min-h-[120px] overflow-visible p-5 relative z-10"
+          >
             <h3 className="section-title mb-3">Evaluate Expression</h3>
             <ExpressionEditor
               value={expression}
               onChange={setExpression}
+              variableNames={Object.keys(context.variables)}
               onFunctionClick={handleFunctionClick}
               onInsertSnippet={(expr) => setExpression(expr)}
               onRun={handleRun}
-              intellisensePortalRef={intellisensePortalRef}
+              intellisensePortalEl={intellisensePortalEl}
             />
-            <div className="mt-4 flex items-start gap-3 flex-wrap">
+            <div className="mt-4 flex items-end gap-3 flex-wrap">
               <RunButton onClick={handleRun} />
               <div
-                ref={intellisensePortalRef}
+                ref={setIntellisensePortalEl}
                 className="relative min-w-[200px]"
                 aria-hidden
               />
@@ -212,9 +242,29 @@ function App() {
               </div>
             )}
           </div>
-          <div id="result-section" className="panel flex-1 flex flex-col min-h-0 p-5 relative z-0">
-            <ResultPanel result={output?.success ? output.value : null} />
+          <div
+            id="result-section"
+            className="panel flex-1 flex flex-col min-h-0 p-5 relative z-0"
+          >
+            <ResultPanel
+              result={output?.success ? output.value : null}
+              trace={trace}
+            />
             <GitHubFeedback />
+          </div>
+          <div
+            id="tests-section"
+            className="panel flex-none flex flex-col min-h-0 p-5"
+          >
+            <h3 className="section-title mb-0">Test Suite</h3>
+            <TestCasesPanel
+              expression={expression}
+              cases={testCases}
+              results={testResults}
+              onChangeCases={setTestCases}
+              onRunAll={handleRunAllCases}
+              showTopDivider={false}
+            />
           </div>
         </div>
         {/* Middle column: Function reference or variable input. Subtle cyan border + shadow when add variable is selected. */}
@@ -232,7 +282,10 @@ function App() {
         </div>
         {/* Fourth column: Variable value preview (only when adding/editing a variable) */}
         {showVariableValuePanel && (
-          <div id="variable-value-panel" className="min-h-[320px] lg:min-h-full lg:h-full flex flex-col order-3">
+          <div
+            id="variable-value-panel"
+            className="min-h-[320px] lg:min-h-full lg:h-full flex flex-col order-3"
+          >
             <VariableValuePanel value={variablePreviewValue} />
           </div>
         )}

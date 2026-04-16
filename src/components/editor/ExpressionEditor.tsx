@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { Tokenizer } from "../../interpreter/parser/tokenizer";
 import type { Token } from "../../interpreter/parser/tokenizer";
@@ -8,21 +8,24 @@ import {
 } from "../../interpreter/functions/metadata";
 import { getIntellisenseContext } from "../../editor/intellisenseContext";
 import type { IntellisenseContext } from "../../editor/intellisenseContext";
-import { IntellisenseDropdown, filterFunctions } from "./IntellisenseDropdown";
+import { IntellisenseDropdown } from "./IntellisenseDropdown";
+import { filterFunctions } from "./intellisenseFilters";
 import { SnippetsPopover } from "./ExpressionSnippets";
 import { computeBracketDepthColors } from "../../editor/bracketHighlight";
 
 interface ExpressionEditorProps {
   value: string;
   onChange: (value: string) => void;
+  /** Available variable names for variables('...') / parameters('...') completion */
+  variableNames: string[];
   placeholder?: string;
   onFunctionClick?: (name: string) => void;
   /** Called when user selects a snippet from the dropdown to insert into the editor */
   onInsertSnippet?: (expression: string) => void;
   /** Called when user presses Ctrl+Enter / Cmd+Enter to run the expression */
   onRun?: () => void;
-  /** Container to portal the intellisense popover into (e.g. next to Run button) */
-  intellisensePortalRef?: React.RefObject<HTMLDivElement | null>;
+  /** Container element to portal the intellisense popover into (e.g. next to Run button) */
+  intellisensePortalEl?: HTMLDivElement | null;
 }
 
 function getTokenClassName(
@@ -60,35 +63,24 @@ function getTokenClassName(
 export function ExpressionEditor({
   value,
   onChange,
+  variableNames,
   placeholder,
   onFunctionClick,
   onInsertSnippet,
   onRun,
-  intellisensePortalRef,
+  intellisensePortalEl,
 }: ExpressionEditorProps) {
   const preRef = useRef<HTMLPreElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const knownFunctions = useRef(new Set(getAllFunctionNames())).current;
+  const knownFunctions = useMemo(() => new Set(getAllFunctionNames()), []);
 
   const [cursor, setCursor] = useState({ start: 0, end: 0 });
   const [intellisenseSelectedIndex, setIntellisenseSelectedIndex] = useState(0);
   const [intellisenseDismissed, setIntellisenseDismissed] = useState(false);
   const [forceShowFunctionList, setForceShowFunctionList] = useState(false);
   const [forceShowSnippetsList, setForceShowSnippetsList] = useState(false);
-  const [, setPortalMounted] = useState(false);
+  const portalMounted = !!intellisensePortalEl;
   const justInsertedSnippetRef = useRef(false);
-
-  useEffect(() => {
-    if (!intellisensePortalRef) return;
-    if (intellisensePortalRef.current) {
-      setPortalMounted(true);
-      return;
-    }
-    const id = requestAnimationFrame(() => {
-      if (intellisensePortalRef.current) setPortalMounted(true);
-    });
-    return () => cancelAnimationFrame(id);
-  }, [intellisensePortalRef]);
 
   const rawContext = getIntellisenseContext(value, cursor.start);
   const effectiveContext: IntellisenseContext | null = forceShowFunctionList
@@ -105,9 +97,10 @@ export function ExpressionEditor({
   const showFunctionList = intellisenseContext?.kind === "function-list";
   const filteredNames =
     showFunctionList && intellisenseContext?.kind === "function-list"
-      ? filterFunctions(intellisenseContext.prefix)
+      ? filterFunctions(intellisenseContext.prefix, 50)
       : [];
   const maxIndex = Math.max(0, filteredNames.length - 1);
+  const clampedSelectedIndex = Math.min(intellisenseSelectedIndex, maxIndex);
 
   const applyCompletion = useCallback(
     (name: string, replaceStart: number, replaceEnd: number) => {
@@ -124,25 +117,9 @@ export function ExpressionEditor({
     [value, onChange],
   );
 
-  useEffect(() => {
-    if (justInsertedSnippetRef.current) {
-      justInsertedSnippetRef.current = false;
-      setIntellisenseDismissed(true);
-      return;
-    }
-    if (!forceShowFunctionList) setIntellisenseDismissed(false);
-  }, [value, cursor.start, forceShowFunctionList]);
-
-  useEffect(() => {
-    if (!showFunctionList) setIntellisenseSelectedIndex(0);
-    else setIntellisenseSelectedIndex((i) => Math.min(i, maxIndex));
-  }, [
-    showFunctionList,
-    intellisenseContext?.kind === "function-list"
-      ? (intellisenseContext as { prefix: string }).prefix
-      : "",
-    maxIndex,
-  ]);
+  const escapeForSingleQuotes = useCallback((s: string) => {
+    return s.replaceAll("\\", "\\\\").replaceAll("'", "\\'");
+  }, []);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -164,7 +141,7 @@ export function ExpressionEditor({
         }
         if (e.key === "Enter" || e.key === "Tab") {
           e.preventDefault();
-          const name = filteredNames[intellisenseSelectedIndex];
+          const name = filteredNames[clampedSelectedIndex];
           if (name && intellisenseContext?.kind === "function-list") {
             applyCompletion(
               name,
@@ -190,7 +167,7 @@ export function ExpressionEditor({
       onRun,
       showFunctionList,
       filteredNames,
-      intellisenseSelectedIndex,
+      clampedSelectedIndex,
       maxIndex,
       intellisenseContext,
       applyCompletion,
@@ -330,12 +307,12 @@ export function ExpressionEditor({
   // Dismiss intellisense/snippets when clicking outside the textarea or the popup (portal container).
   // Use capture phase so we run before other handlers and close on first click.
   useEffect(() => {
-    if ((!intellisenseContext && !forceShowSnippetsList) || !intellisensePortalRef)
+    if ((!intellisenseContext && !forceShowSnippetsList) || !intellisensePortalEl)
       return;
     const handleMouseDown = (e: MouseEvent) => {
       const target = e.target as Node;
       if (textareaRef.current?.contains(target)) return;
-      if (intellisensePortalRef.current?.contains(target)) return;
+      if (intellisensePortalEl.contains(target)) return;
       handleCloseIntellisense();
     };
     document.addEventListener("mousedown", handleMouseDown, true);
@@ -343,7 +320,7 @@ export function ExpressionEditor({
   }, [
     intellisenseContext,
     forceShowSnippetsList,
-    intellisensePortalRef,
+    intellisensePortalEl,
     handleCloseIntellisense,
   ]);
 
@@ -354,7 +331,7 @@ export function ExpressionEditor({
     intellisenseContext?.kind === "function-list" && filteredNames.length === 0;
   const showExpandButton =
     (!intellisenseContext || isUnknownFunction || isFunctionListWithNoMatches) &&
-    intellisensePortalRef?.current;
+    portalMounted;
   const showButtonsRow = showExpandButton || forceShowSnippetsList;
 
   return (
@@ -367,6 +344,14 @@ export function ExpressionEditor({
           onChange(e.target.value);
           const ta = e.target;
           setCursor({ start: ta.selectionStart, end: ta.selectionEnd });
+          if (justInsertedSnippetRef.current) {
+            justInsertedSnippetRef.current = false;
+            setIntellisenseDismissed(true);
+            setForceShowFunctionList(false);
+            setForceShowSnippetsList(false);
+          } else if (!forceShowFunctionList) {
+            setIntellisenseDismissed(false);
+          }
         }}
         onSelect={(e) => {
           const ta = e.target as HTMLTextAreaElement;
@@ -389,20 +374,23 @@ export function ExpressionEditor({
       {intellisenseContext && !forceShowSnippetsList && (
         <IntellisenseDropdown
           context={intellisenseContext}
-          anchorRef={textareaRef}
-          intellisensePortalRef={intellisensePortalRef}
+          variableNames={variableNames}
+          intellisensePortalEl={intellisensePortalEl}
           selectedIndex={intellisenseSelectedIndex}
           onHighlightIndex={setIntellisenseSelectedIndex}
           onSelectFunction={(name, replaceStart, replaceEnd) => {
             applyCompletion(name, replaceStart, replaceEnd);
             setForceShowFunctionList(false);
           }}
+          onSelectStringLiteral={(raw, replaceStart, replaceEnd) => {
+            applyCompletion(escapeForSingleQuotes(raw), replaceStart, replaceEnd);
+            setForceShowFunctionList(false);
+          }}
           onClose={handleCloseIntellisense}
         />
       )}
       {showButtonsRow &&
-        intellisensePortalRef &&
-        intellisensePortalRef.current &&
+        intellisensePortalEl &&
         createPortal(
           <div className="flex items-end gap-2">
             <button
@@ -469,7 +457,7 @@ export function ExpressionEditor({
               </div>
             )}
           </div>,
-          intellisensePortalRef.current,
+          intellisensePortalEl,
         )}
       <pre
         ref={preRef}

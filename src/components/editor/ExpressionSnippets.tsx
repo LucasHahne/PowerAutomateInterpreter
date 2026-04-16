@@ -14,7 +14,7 @@ export function SnippetsPopover({
 }) {
   return (
     <div
-      className="intellisense-popover function-list rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800/95 shadow-xl backdrop-blur overflow-hidden min-w-[200px] max-h-[280px] flex flex-col"
+      className="intellisense-popover function-list rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 shadow-xl overflow-hidden min-w-[200px] max-h-[280px] flex flex-col"
       style={popoverStyle}
       role="listbox"
     >

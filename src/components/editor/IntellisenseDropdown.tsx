@@ -1,11 +1,9 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import type { IntellisenseContext } from "../../editor/intellisenseContext";
-import {
-  getFunctionMetadata,
-  getAllFunctionNames,
-} from "../../interpreter/functions/metadata";
+import { getFunctionMetadata } from "../../interpreter/functions/metadata";
 import type { FunctionMetadata } from "../../interpreter/functions/metadata";
+import { filterFunctions, filterStringLiteralNames } from "./intellisenseFilters";
 
 /** Max items when filtering by prefix (keeps list scannable). No limit when showing full list. */
 const MAX_FILTERED_ITEMS = 50;
@@ -14,9 +12,10 @@ const INTELLISENSE_Z_INDEX = 9999;
 
 export interface IntellisenseDropdownProps {
   context: IntellisenseContext;
-  anchorRef: React.RefObject<HTMLTextAreaElement | null>;
+  /** Names available for variables('...') / parameters('...') completion */
+  variableNames?: string[];
   /** When set, popover is portaled into this container (placed next to Run button) and positioned at top-left with high z-index */
-  intellisensePortalRef?: React.RefObject<HTMLDivElement | null>;
+  intellisensePortalEl?: HTMLElement | null;
   /** For function list: selected index (controlled by parent for keyboard) */
   selectedIndex?: number;
   /** For function list: called when user hovers an item */
@@ -26,19 +25,12 @@ export interface IntellisenseDropdownProps {
     replaceStart: number,
     replaceEnd: number,
   ) => void;
+  onSelectStringLiteral?: (
+    value: string,
+    replaceStart: number,
+    replaceEnd: number,
+  ) => void;
   onClose: () => void;
-}
-
-export function filterFunctions(prefix: string): string[] {
-  const all = getAllFunctionNames();
-  const sorted = [...all].sort((a, b) =>
-    a.toLowerCase().localeCompare(b.toLowerCase()),
-  );
-  const lower = prefix.toLowerCase();
-  const filtered = lower
-    ? sorted.filter((name) => name.toLowerCase().startsWith(lower))
-    : sorted;
-  return lower ? filtered.slice(0, MAX_FILTERED_ITEMS) : filtered;
 }
 
 const POPOVER_STYLE: React.CSSProperties = {
@@ -50,35 +42,24 @@ const POPOVER_STYLE: React.CSSProperties = {
 
 export function IntellisenseDropdown({
   context,
-  anchorRef: _anchorRef,
-  intellisensePortalRef,
+  variableNames = [],
+  intellisensePortalEl,
   selectedIndex = 0,
   onHighlightIndex,
   onSelectFunction,
+  onSelectStringLiteral,
   onClose,
 }: IntellisenseDropdownProps) {
   const listRef = useRef<HTMLDivElement>(null);
-  const [portalReady, setPortalReady] = useState(false);
-
-  // When we have a portal ref, trigger re-render once it's mounted (sibling div is after ExpressionEditor in DOM order)
-  useEffect(() => {
-    if (!context) {
-      setPortalReady(false);
-      return;
-    }
-    if (!intellisensePortalRef) return;
-    if (intellisensePortalRef.current) {
-      setPortalReady(true);
-      return;
-    }
-    const id = requestAnimationFrame(() => {
-      if (intellisensePortalRef.current) setPortalReady(true);
-    });
-    return () => cancelAnimationFrame(id);
-  }, [context, intellisensePortalRef]);
 
   const functionNames =
-    context?.kind === "function-list" ? filterFunctions(context.prefix) : [];
+    context?.kind === "function-list"
+      ? filterFunctions(context.prefix, MAX_FILTERED_ITEMS)
+      : [];
+  const stringLiteralNames =
+    context?.kind === "string-literal-list"
+      ? filterStringLiteralNames(variableNames, context.prefix, MAX_FILTERED_ITEMS)
+      : [];
   const metadata: FunctionMetadata | undefined =
     context?.kind === "parameter-hint"
       ? getFunctionMetadata(context.functionName)
@@ -89,7 +70,11 @@ export function IntellisenseDropdown({
       : undefined;
 
   useEffect(() => {
-    if (!context || context.kind !== "function-list") return;
+    if (
+      !context ||
+      (context.kind !== "function-list" && context.kind !== "string-literal-list")
+    )
+      return;
     const el = listRef.current;
     if (!el) return;
     const selected = el.querySelector("[data-selected]");
@@ -97,10 +82,6 @@ export function IntellisenseDropdown({
   }, [context, selectedIndex]);
 
   if (!context) return null;
-
-  // Wait for portal target to be mounted so we don't flash in wrong place
-  if (intellisensePortalRef && !intellisensePortalRef.current && !portalReady)
-    return null;
 
   const popoverContent =
     context.kind === "parameter-hint" ? (
@@ -111,10 +92,24 @@ export function IntellisenseDropdown({
         popoverStyle={POPOVER_STYLE}
         onClose={onClose}
       />
+    ) : context.kind === "string-literal-list" ? (
+      stringLiteralNames.length === 0 ? null : (
+        <StringLiteralListPopover
+          title={context.source === "variables" ? "Variables" : "Parameters"}
+          items={stringLiteralNames}
+          replaceStart={context.replaceStart}
+          replaceEnd={context.replaceEnd}
+          selectedIndex={selectedIndex}
+          onHighlightIndex={onHighlightIndex}
+          listRef={listRef}
+          popoverStyle={POPOVER_STYLE}
+          onSelectItem={(v, s, e) => onSelectStringLiteral?.(v, s, e)}
+          onClose={onClose}
+        />
+      )
     ) : functionNames.length === 0 ? null : (
       <FunctionListPopover
         functionNames={functionNames}
-        prefix={context.prefix}
         replaceStart={context.replaceStart}
         replaceEnd={context.replaceEnd}
         selectedIndex={selectedIndex}
@@ -128,7 +123,7 @@ export function IntellisenseDropdown({
 
   if (!popoverContent) return null;
 
-  const portalTarget = intellisensePortalRef?.current ?? document.body;
+  const portalTarget = intellisensePortalEl ?? document.body;
   return createPortal(popoverContent, portalTarget as HTMLElement);
 }
 
@@ -151,7 +146,7 @@ function ParameterHintPopover({
 
   return (
     <div
-      className="intellisense-popover parameter-hint rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800/95 shadow-xl backdrop-blur px-3 py-2.5 max-w-[320px]"
+      className="intellisense-popover parameter-hint rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 shadow-xl px-3 py-2.5 max-w-[320px]"
       style={popoverStyle}
       role="tooltip"
     >
@@ -234,11 +229,9 @@ function FunctionListPopover({
   listRef,
   popoverStyle,
   onSelectFunction,
-  prefix: _prefix,
   onClose,
 }: {
   functionNames: string[];
-  prefix: string;
   replaceStart: number;
   replaceEnd: number;
   selectedIndex: number;
@@ -254,7 +247,7 @@ function FunctionListPopover({
 }) {
   return (
     <div
-      className="intellisense-popover function-list rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800/95 shadow-xl backdrop-blur overflow-hidden min-w-[200px] max-h-[280px] flex flex-col"
+      className="intellisense-popover function-list rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 shadow-xl overflow-hidden min-w-[200px] max-h-[280px] flex flex-col"
       style={popoverStyle}
       role="listbox"
     >
@@ -307,6 +300,86 @@ function FunctionListPopover({
                   {meta.signature}
                 </span>
               )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function StringLiteralListPopover({
+  title,
+  items,
+  replaceStart,
+  replaceEnd,
+  selectedIndex,
+  onHighlightIndex,
+  listRef,
+  popoverStyle,
+  onSelectItem,
+  onClose,
+}: {
+  title: string;
+  items: string[];
+  replaceStart: number;
+  replaceEnd: number;
+  selectedIndex: number;
+  onHighlightIndex?: (index: number) => void;
+  listRef: React.RefObject<HTMLDivElement | null>;
+  popoverStyle: React.CSSProperties;
+  onSelectItem?: (value: string, replaceStart: number, replaceEnd: number) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="intellisense-popover function-list rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 shadow-xl overflow-hidden min-w-[200px] max-h-[280px] flex flex-col"
+      style={popoverStyle}
+      role="listbox"
+    >
+      <div className="flex items-center justify-between gap-2 text-slate-600 dark:text-slate-400 text-xs font-medium uppercase tracking-wider px-3 py-2 border-b border-slate-200 dark:border-slate-700">
+        <span>{title}</span>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors shrink-0"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+      <div ref={listRef} className="overflow-auto py-1">
+        {items.map((name, i) => {
+          const isSelected = i === selectedIndex;
+          return (
+            <button
+              key={name}
+              type="button"
+              data-selected={isSelected ? true : undefined}
+              className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${
+                isSelected
+                  ? "bg-cyan-500/20 text-cyan-700 dark:text-cyan-200"
+                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50"
+              }`}
+              onClick={() => onSelectItem?.(name, replaceStart, replaceEnd)}
+              onMouseEnter={() => onHighlightIndex?.(i)}
+            >
+              <span className="font-mono text-cyan-400 font-medium">
+                {name}
+              </span>
             </button>
           );
         })}

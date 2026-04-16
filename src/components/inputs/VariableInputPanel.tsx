@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import type { EvaluationContext, InputType } from "../../interpreter/context";
-import {
-  parseValue,
-  valueToString,
-  validateValue,
-} from "../inputs/variableFormUtils";
+import { parseValue, valueToString, validateValue } from "./variableFormUtils";
 
 const INPUT_TYPES: InputType[] = [
   "string",
@@ -53,16 +49,10 @@ export function VariableInputPanel({
   onParsedValueChange,
 }: VariableInputPanelProps) {
   const isNew = selectedVariable === NEW_VARIABLE_SENTINEL;
-  const [name, setName] = useState("");
-  const [type, setType] = useState<InputType>("string");
-  const [valueStr, setValueStr] = useState("");
-
-  useEffect(() => {
-    const initial = getInitialState(selectedVariable, context);
-    setName(initial.name);
-    setType(initial.type);
-    setValueStr(initial.valueStr);
-  }, [selectedVariable, context]);
+  const initial = getInitialState(selectedVariable, context);
+  const [name, setName] = useState(initial.name);
+  const [type, setType] = useState<InputType>(initial.type);
+  const [valueStr, setValueStr] = useState(initial.valueStr);
 
   const nameTrimmed = name.trim();
   const nameValid = nameTrimmed.length > 0;
@@ -108,7 +98,7 @@ export function VariableInputPanel({
         {isNew ? "Add variable" : "Edit variable"}
       </h3>
 
-      <div className="flex flex-col gap-4 flex-1 min-h-0 overflow-y-auto overflow-x-hidden min-w-0 px-1">
+      <div className="flex flex-col gap-4 min-w-0 px-1">
         <div className="shrink-0">
           <label className="block text-slate-600 dark:text-slate-400 text-sm font-medium mb-1.5">
             Name
@@ -148,19 +138,19 @@ export function VariableInputPanel({
           </select>
         </div>
 
-        <div className="flex flex-col min-h-0 flex-1">
+        <div className="flex flex-col">
           <label className="block text-slate-600 dark:text-slate-400 text-sm font-medium mb-1.5 shrink-0">
             Value
           </label>
           {isJson ? (
-            <div className="flex flex-col min-h-0 flex-1">
+            <div className="flex flex-col">
               <textarea
                 value={valueStr}
                 onChange={(e) => setValueStr(e.target.value)}
                 placeholder={
                   type === "object" ? '{"key": "value"}' : "[1, 2, 3]"
                 }
-                className="input-dark w-full flex-1 min-h-[80px] font-mono text-sm resize-none"
+                className="input-dark w-full min-h-[96px] max-h-[40vh] overflow-auto font-mono text-sm resize-none"
                 spellCheck={false}
               />
               {valueStr.trim() && parsedValue === undefined && (
@@ -218,7 +208,7 @@ export function VariableInputPanel({
           disabled={!canSave}
           className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isNew ? "Add" : "Save"}
+          Save
         </button>
         <button type="button" onClick={onCancel} className="btn-secondary">
           Cancel

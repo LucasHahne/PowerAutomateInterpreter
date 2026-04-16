@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { validateArity } from './validator';
 import { parseExpression } from './parser/parser';
 import { EvaluationError } from './evaluator';
